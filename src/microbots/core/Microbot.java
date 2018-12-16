@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Constructor;
 import microbots.Action;
-import microbots.Direction;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
 import microbots.Surroundings;

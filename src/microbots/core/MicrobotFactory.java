@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
-import microbots.Direction;
 import microbots.MicrobotProcessingUnit;
 
 /**

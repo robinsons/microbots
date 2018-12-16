@@ -1,10 +1,10 @@
-package microbots;
+package microbots.core;
 
 /**
  * Represents the four cardinal directions. In the microbot arena, these are used to compute cell
  * adjacency.
  */
-public enum Direction {
+enum Direction {
 
   NORTH(-1, 0),
   EAST(0, 1),
@@ -29,12 +29,12 @@ public enum Direction {
    *   c += Direction.NORTH.columnOffset();
    * </pre>
    */
-  public int rowOffset() {
+  int rowOffset() {
     return rowOffset;
   }
 
   /** @see #rowOffset() */
-  public int columnOffset() {
+  int columnOffset() {
     return columnOffset;
   }
 
@@ -43,7 +43,7 @@ public enum Direction {
    * elements in this enum has been defined in such a way that this is equivalent to performing a
    * 90 degree clockwise rotation.
    */
-  public Direction next() {
+  Direction next() {
     return values()[(ordinal() + 1) % 4];
   }
 
@@ -51,7 +51,7 @@ public enum Direction {
    * Similar to {@link #next()}, but returns the previous element instead. This is equivalent to
    * performing a 90 degree counterclockwise rotation.
    */
-  public Direction previous() {
+  Direction previous() {
     // Why "ordinal() + 3" instead of "ordinal() - 1"? The modulo operator in Java preserves the
     // sign of the leading operand. In the case where ordinal() == 0, computing the previous index
     // would then result in an ArrayIndexOutOfBoundsException (-1). Thus, to ensure that we always
@@ -60,7 +60,7 @@ public enum Direction {
   }
 
   /** Returns a random direction (selected uniformly). */
-  public static Direction random() {
+  static Direction random() {
     return values()[(int)(4 * Math.random())];
   }
 }
