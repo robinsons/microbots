@@ -1,5 +1,7 @@
 package microbots;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A microbot's surroundings are the four cells adjacent to it in the cardinal directions. When
  * preparing to take an action, a microbot may inspect its surroundings to influence its decision.
@@ -12,10 +14,10 @@ public final class Surroundings {
   private final Obstacle back;
 
   public Surroundings(Obstacle front, Obstacle left, Obstacle right, Obstacle back) {
-    this.front = front;
-    this.left = left;
-    this.right = right;
-    this.back = back;
+    this.front = checkNotNull(front);
+    this.left = checkNotNull(left);
+    this.right = checkNotNull(right);
+    this.back = checkNotNull(back);
   }
 
   public Obstacle front() {
