@@ -24,6 +24,17 @@ final class Arena {
   }
 
   /**
+   * Returns the microbot in the adjacent cell in the direction that the given microbot is facing,
+   * or else {@link Optional#empty()} if that cell is unoccupied.
+   */
+  Optional<Microbot> getFacedMicrobot(Microbot microbot) {
+    Direction direction = microbot.facing();
+    return microbotAt(
+        microbot.row() + direction.rowOffset(),
+        microbot.column() + direction.columnOffset());
+  }
+
+  /**
    * Moves the given microbot one cell in the direction it is currently facing, provided that the
    * destination cell is unoccupied.
    */
@@ -62,8 +73,15 @@ final class Arena {
       return Obstacle.WALL;
     }
 
-    Optional<Microbot> otherMicrobot = Optional.ofNullable(grid.get(otherRow, otherColumn));
-    return otherMicrobot.map(microbot::classify).orElse(Obstacle.NONE);
+    return microbotAt(otherRow, otherColumn).map(microbot::classify).orElse(Obstacle.NONE);
+  }
+
+  /**
+   * Returns the microbot location at the specified position, or else {@link Optional#empty()} if
+   * the position is unoccupied.
+   */
+  private Optional<Microbot> microbotAt(int row, int column) {
+    return Optional.ofNullable(grid.get(row, column));
   }
 
   /**

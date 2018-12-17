@@ -33,10 +33,10 @@ final class MicrobotFactory {
    * For each provided {@link MicrobotProcessingUnit mpuType} creates {@link #quantity} microbots.
    * The returned list is shuffled.
    */
-  ImmutableList<Microbot> ofEachMpu(Class<? extends MicrobotProcessingUnit>... mpuTypes)
+  ImmutableList<Microbot> ofEachMpu(Iterable<Class<? extends MicrobotProcessingUnit>> mpuTypes)
       throws Exception {
     checkNotNull(mpuTypes);
-    ArrayList<Microbot> microbots = new ArrayList<>(quantity * mpuTypes.length);
+    ArrayList<Microbot> microbots = new ArrayList<>();
     for (Class<? extends MicrobotProcessingUnit> mpuType : mpuTypes) {
       microbots.addAll(ofMpu(mpuType));
     }
