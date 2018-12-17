@@ -24,12 +24,28 @@ final class Arena {
   }
 
   /**
+   * Moves the given microbot one cell in the direction it is currently facing, provided that the
+   * destination cell is unoccupied.
+   */
+  void moveMicrobot(Microbot microbot) {
+    checkNotNull(microbot);
+    Direction direction = microbot.facing();
+    if (getObstacleRelativeToMicrobot(microbot, direction) == Obstacle.NONE) {
+      grid.remove(microbot.row(), microbot.column());
+      microbot.setRow(microbot.row() + direction.rowOffset());
+      microbot.setColumn(microbot.column() + direction.columnOffset());
+      grid.put(microbot.row(), microbot.column(), microbot);
+    }
+  }
+
+  /**
    * Returns the surroundings of the given microbot. A microbot's surroundings are the four cells
    * immediately adjacent to that microbot in the cardinal {@link Direction directions}. The
    * returned surroundings are oriented relative to the direction the microbot is facing, i.e. they
    * use the terms "front" and "back" rather than "north" and "south".
    */
   Surroundings getMicrobotSurroundings(Microbot microbot) {
+    checkNotNull(microbot);
     return new Surroundings(
         getObstacleRelativeToMicrobot(microbot, microbot.facing()),
         getObstacleRelativeToMicrobot(microbot, microbot.facing().previous()),
@@ -110,6 +126,7 @@ final class Arena {
     private void placeMicrobot(Microbot microbot, Table<Integer, Integer, Microbot> grid) {
       int row = 0;
       int column = 0;
+
       while (grid.contains(row, column)) {
         row = (int)(rows * Math.random());
         column = (int)(columns * Math.random());
