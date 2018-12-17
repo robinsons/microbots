@@ -59,6 +59,14 @@ enum Direction {
     return values()[(ordinal() + 3) % 4];
   }
 
+  /**
+   * Similar to {@link #next()} or {@link #previous()}, but returns the element opposite {@code
+   * this} instead. This is equivalent to performing a 180 degree rotation.
+   */
+  Direction opposite() {
+    return values()[(ordinal() + 2) % 4];
+  }
+
   /** Returns a random direction (selected uniformly). */
   static Direction random() {
     return values()[(int)(4 * Math.random())];

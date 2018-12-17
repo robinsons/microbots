@@ -13,10 +13,16 @@ final class Microbot {
 
   private MicrobotProcessingUnit mpu;
   private Direction facing;
+  private int row;
+  private int column;
 
   Microbot(MicrobotProcessingUnit mpu, Direction facing) {
     this.mpu = checkNotNull(mpu);
     this.facing = checkNotNull(facing);
+
+    // These will be initialized when the microbot is placed in an arena.
+    this.row = -1;
+    this.column = -1;
   }
 
   /** @see MicrobotProcessingUnit#name() */
@@ -28,6 +34,26 @@ final class Microbot {
   Action getAction(Surroundings surroundings) {
     checkNotNull(surroundings);
     return mpu.getAction(surroundings);
+  }
+
+  /** Returns the row this microbot is located at in the arena. */
+  int row() {
+    return row;
+  }
+
+  /** Returns the column this microbot is located at in the arena. */
+  int column() {
+    return column;
+  }
+
+  /** Updates this microbot's {@link #row}. */
+  void setRow(int row) {
+    this.row = row;
+  }
+
+  /** Updates this microbot's {@link #column}. */
+  void setColumn(int column) {
+    this.column = column;
   }
 
   /** Returns the {@link Direction} this microbot is currently facing. */
