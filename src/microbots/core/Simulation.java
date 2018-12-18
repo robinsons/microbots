@@ -42,15 +42,19 @@ public final class Simulation {
 
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
+  private final Window window;
 
-  private Simulation(ImmutableList<Microbot> microbots, Arena arena) {
+  private Simulation(ImmutableList<Microbot> microbots, Arena arena, Window window) {
     this.microbots = microbots;
     this.arena = arena;
+    this.window = window;
   }
 
   /** Runs the simulation! */
   @SuppressWarnings("InfiniteLoopStatement")
   public void run() {
+    window.setVisible(true);
+
     while (true) {
       microbots.forEach(this::doTurn);
     }
@@ -128,10 +132,15 @@ public final class Simulation {
           !mpuTypes.isEmpty(),
           "Must specify at least one MPU type to create a simulation.");
 
-      ImmutableList<Microbot> microbots =
-          MicrobotFactory.create(populationSize).ofEach(mpuTypes);
+      // Data model parameters.
+      ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
-      return new Simulation(microbots, arena);
+
+      // View parameters.
+      ArenaView arenaView = ArenaView.of(arena);
+      Window window = Window.builder().setArenaView(arenaView).build();
+
+      return new Simulation(microbots, arena, window);
     }
   }
 }

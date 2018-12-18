@@ -23,6 +23,16 @@ final class Arena {
     this.columns = columns;
   }
 
+  /** Returns the number of {@link #rows} in this arena. */
+  int rows() {
+    return rows;
+  }
+
+  /** Returns the number of {@link #columns} in this arena. */
+  int columns() {
+    return columns;
+  }
+
   /**
    * Returns the microbot in the adjacent cell in the direction that the given microbot is facing,
    * or else {@link Optional#empty()} if that cell is unoccupied.
