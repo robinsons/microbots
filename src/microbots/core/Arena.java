@@ -105,27 +105,27 @@ final class Arena {
     private ImmutableList<Microbot> microbots = ImmutableList.of();
 
     /** Sets the number of rows in the arena. Must be positive. */
-    public Builder withRows(int rows) {
+    Builder withRows(int rows) {
       checkArgument(rows > 0, "rows must be positive.");
       this.rows = rows;
       return this;
     }
 
     /** Sets the number of columns in the arena. Must be positive. */
-    public Builder withColumns(int columns) {
+    Builder withColumns(int columns) {
       checkArgument(columns > 0, "columns must be positive.");
       this.columns = columns;
       return this;
     }
 
     /** Sets the microbots that will participate in the simulation. */
-    public Builder withMicrobots(ImmutableList<Microbot> microbots) {
+    Builder withMicrobots(ImmutableList<Microbot> microbots) {
       this.microbots = checkNotNull(microbots);
       return this;
     }
 
     /** Returns a new arena instance. Can only be called once. */
-    public Arena build() {
+    Arena build() {
       checkArgument(
           rows * columns >= microbots.size(),
           "Arena of size %d is not large enough to accommodate %d microbots.",
