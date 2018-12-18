@@ -5,6 +5,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
 import java.util.Optional;
 import microbots.Obstacle;
@@ -31,6 +32,11 @@ final class Arena {
   /** Returns the number of {@link #columns} in this arena. */
   int columns() {
     return columns;
+  }
+
+  /** Returns all of the microbots currently in this arena. */
+  ImmutableSet<Microbot> microbots() {
+    return ImmutableSet.copyOf(grid.values());
   }
 
   /**

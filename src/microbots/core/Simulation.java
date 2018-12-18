@@ -52,11 +52,13 @@ public final class Simulation {
 
   /** Runs the simulation! */
   @SuppressWarnings("InfiniteLoopStatement")
-  public void run() {
+  public void run() throws Exception {
     window.setVisible(true);
 
     while (true) {
       microbots.forEach(this::doTurn);
+      window.repaint();
+      Thread.sleep(125);
     }
   }
 

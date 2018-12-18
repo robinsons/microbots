@@ -1,11 +1,19 @@
 package microbots.impl;
 
+import java.awt.Color;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
 import microbots.Surroundings;
 
 public final class JunkyardBot extends MicrobotProcessingUnit {
+
+  private static final Color COLOR = new Color(0xf4414d);
+
+  @Override
+  public Color color() {
+    return COLOR;
+  }
 
   @Override
   public Action getAction(Surroundings surroundings) {

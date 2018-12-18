@@ -2,6 +2,7 @@ package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.awt.Color;
 import java.lang.reflect.Constructor;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
@@ -28,6 +29,11 @@ final class Microbot {
   /** @see MicrobotProcessingUnit#name() */
   String name() {
     return mpu.name();
+  }
+
+  /** @see MicrobotProcessingUnit#color() */
+  Color color() {
+    return mpu.color();
   }
 
   /** @see MicrobotProcessingUnit#getAction(Surroundings) */

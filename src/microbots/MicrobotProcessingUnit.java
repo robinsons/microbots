@@ -1,5 +1,7 @@
 package microbots;
 
+import java.awt.Color;
+
 /** A Microbot Processing Unit (MPU) acts as the brain of a microbot. */
 public abstract class MicrobotProcessingUnit {
 
@@ -7,12 +9,15 @@ public abstract class MicrobotProcessingUnit {
   public MicrobotProcessingUnit() {}
 
   /**
-   * Returns the name of the microbot. Defaults to the class name, but may be overridden by
+   * Returns the name of this microbot. Defaults to the class name, but may be overridden by
    * subclasses.
    */
   public String name() {
     return getClass().getSimpleName();
   }
+
+  /** Returns the color to use when drawing this microbot. */
+  public abstract Color color();
 
   /**
    * Given a microbot's {@link Surroundings}, returns the {@link Action} this microbot will attempt
