@@ -18,7 +18,7 @@ import microbots.MicrobotProcessingUnit;
  *   ...
  *   ImmutableList&lt;Microbot&gt; microbots =
  *       MicrobotFactory.create(100)
- *           .ofEachMpu(Microbot9000.class, MicrobotPrime.class);
+ *           .ofEach(Microbot9000.class, MicrobotPrime.class);
  * </pre>
  */
 final class MicrobotFactory {
@@ -33,12 +33,12 @@ final class MicrobotFactory {
    * For each provided {@link MicrobotProcessingUnit mpuType} creates {@link #quantity} microbots.
    * The returned list is shuffled.
    */
-  ImmutableList<Microbot> ofEachMpu(Iterable<Class<? extends MicrobotProcessingUnit>> mpuTypes)
+  ImmutableList<Microbot> ofEach(Iterable<Class<? extends MicrobotProcessingUnit>> mpuTypes)
       throws Exception {
     checkNotNull(mpuTypes);
     ArrayList<Microbot> microbots = new ArrayList<>();
     for (Class<? extends MicrobotProcessingUnit> mpuType : mpuTypes) {
-      microbots.addAll(ofMpu(mpuType));
+      microbots.addAll(of(mpuType));
     }
     Collections.shuffle(microbots);
     return ImmutableList.copyOf(microbots);
@@ -47,7 +47,7 @@ final class MicrobotFactory {
   /**
    * Creates {@link #quantity} microbots each with the given {@link MicrobotProcessingUnit mpuType}.
    */
-  private <MpuT extends MicrobotProcessingUnit> ArrayList<Microbot> ofMpu(Class<MpuT> mpuType)
+  private <MpuT extends MicrobotProcessingUnit> ArrayList<Microbot> of(Class<MpuT> mpuType)
       throws Exception {
     checkNotNull(mpuType);
     ArrayList<Microbot> microbots = new ArrayList<>(quantity);

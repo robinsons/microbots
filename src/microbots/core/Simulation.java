@@ -129,7 +129,7 @@ public final class Simulation {
           "Must specify at least one MPU type to create a simulation.");
 
       ImmutableList<Microbot> microbots =
-          MicrobotFactory.create(populationSize).ofEachMpu(mpuTypes);
+          MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
       return new Simulation(microbots, arena);
     }
