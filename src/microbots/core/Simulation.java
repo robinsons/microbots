@@ -58,7 +58,7 @@ public final class Simulation {
     while (true) {
       microbots.forEach(this::doTurn);
       window.repaint();
-      Thread.sleep(125);
+      Thread.sleep(125L);
     }
   }
 
@@ -131,8 +131,7 @@ public final class Simulation {
     /** Returns a new simulation instance based on the parameters of this builder. */
     public Simulation build() throws Exception {
       checkArgument(
-          !mpuTypes.isEmpty(),
-          "Must specify at least one MPU type to create a simulation.");
+          !mpuTypes.isEmpty(), "Must specify at least one MPU type to create a simulation.");
 
       // Data model parameters.
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
@@ -140,7 +139,9 @@ public final class Simulation {
 
       // View parameters.
       ArenaView arenaView = ArenaView.of(arena);
-      Window window = Window.builder().setArenaView(arenaView).build();
+      PopulationView populationView = PopulationView.of(arena);
+      Window window =
+          Window.builder().setArenaView(arenaView).setPopulationView(populationView).build();
 
       return new Simulation(microbots, arena, window);
     }
