@@ -99,8 +99,6 @@ final class Microbot {
    */
   Obstacle classify(Microbot other) {
     checkNotNull(other);
-    return other.mpu.getClass().equals(this.mpu.getClass())
-        ? Obstacle.FRIEND
-        : Obstacle.ENEMY;
+    return other.mpu.getClass().equals(this.mpu.getClass()) ? Obstacle.FRIEND : Obstacle.ENEMY;
   }
 }

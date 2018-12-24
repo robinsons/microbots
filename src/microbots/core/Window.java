@@ -2,7 +2,9 @@ package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /** The window holds UI components that show the simulation as it runs. */
 final class Window extends JFrame {
@@ -19,6 +21,7 @@ final class Window extends JFrame {
 
     private JPanel arenaView;
     private JPanel populationView;
+    private JPanel histogramView;
 
     /** Sets the component that will show the main arena where microbots are battling. */
     Builder setArenaView(JPanel arenaView) {
@@ -32,18 +35,30 @@ final class Window extends JFrame {
       return this;
     }
 
+    /** Sets the component that will display microbot population history during a battle. */
+    Builder setHistogramView(JPanel histogramView) {
+      this.histogramView = histogramView;
+      return this;
+    }
+
     /** Returns a new {@link Window} instance based on the parameters of this builder. */
     Window build() {
       checkNotNull(arenaView);
       checkNotNull(populationView);
+      checkNotNull(histogramView);
 
-      JPanel container = new JPanel();
-      container.setLayout(new BoxLayout(container, BoxLayout.X_AXIS));
-      container.add(arenaView);
-      container.add(populationView);
+      JPanel infoContainer = new JPanel();
+      infoContainer.setLayout(new BoxLayout(infoContainer, BoxLayout.Y_AXIS));
+      infoContainer.add(populationView);
+      infoContainer.add(histogramView);
+
+      JPanel mainContainer = new JPanel();
+      mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.X_AXIS));
+      mainContainer.add(arenaView);
+      mainContainer.add(infoContainer);
 
       Window window = new Window();
-      window.add(container);
+      window.add(mainContainer);
       window.pack();
 
       window.setTitle(WINDOW_TITLE);

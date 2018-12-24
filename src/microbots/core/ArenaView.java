@@ -6,7 +6,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 
 /** Offers a view of the {@link Arena} by showing the microbots. */
 final class ArenaView extends JPanel {

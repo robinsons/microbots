@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static microbots.core.ArenaView.MICROBOT_BOUNDARY_SIZE_PX;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSetMultimap;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -13,12 +12,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.Map.Entry;
-import java.util.function.Function;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import microbots.core.PopulationSnapshot.Population;
 
 /** Shows the remaining population of each microbot type in the battle. */
 final class PopulationView extends JPanel {
@@ -28,11 +25,8 @@ final class PopulationView extends JPanel {
   private static final int INSET_PX = 10;
   private static final long UPDATE_FREQUENCY_MILLIS = 500L;
 
-  private static final Comparator<MicrobotSnapshot> DESCENDING_BY_POPULATION_SIZE =
-      Comparator.<MicrobotSnapshot>comparingInt(snapshot -> snapshot.populationSize).reversed();
-
-  private long lastUpdateTimeMillis;
-  private ImmutableList<MicrobotSnapshot> snapshots;
+  private static final Comparator<Population> DESCENDING_BY_POPULATION_SIZE =
+      Comparator.comparingInt(Population::size).reversed();
 
   private final Arena arena;
 
@@ -44,38 +38,26 @@ final class PopulationView extends JPanel {
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
 
-    if (System.currentTimeMillis() - lastUpdateTimeMillis >= UPDATE_FREQUENCY_MILLIS
-        || snapshots == null) {
-      lastUpdateTimeMillis = System.currentTimeMillis();
-      snapshots =
-          arena
-              .microbots()
-              .stream()
-              .collect(
-                  ImmutableSetMultimap.toImmutableSetMultimap(Microbot::name, Function.identity()))
-              .asMap()
-              .entrySet()
-              .stream()
-              .map(MicrobotSnapshot::of)
-              .sorted(DESCENDING_BY_POPULATION_SIZE)
-              .collect(ImmutableList.toImmutableList());
-    }
+    PopulationSnapshot snapshot =
+        PopulationSnapshot.of(arena).withMaxStaleness(UPDATE_FREQUENCY_MILLIS).get();
+    ImmutableList<Population> populations =
+        ImmutableList.sortedCopyOf(DESCENDING_BY_POPULATION_SIZE, snapshot.populations());
 
     int position = 0;
-    for (MicrobotSnapshot snapshot : snapshots) {
+    for (Population population : populations) {
       position += FONT_SIZE;
-      showMicrobotPopulation(snapshot, position, g);
+      showMicrobotPopulation(population, position, g);
     }
   }
 
   /** Shows the indicated microbot's population. */
-  private void showMicrobotPopulation(MicrobotSnapshot snapshot, int position, Graphics g) {
-    g.setColor(snapshot.color);
-    g.drawString(snapshot.name, INSET_PX, position);
+  private void showMicrobotPopulation(Population population, int position, Graphics g) {
+    g.setColor(population.color());
+    g.drawString(population.name(), INSET_PX, position);
 
-    String population = String.format("%d", snapshot.populationSize);
-    int populationWidth = g.getFontMetrics().stringWidth(population);
-    g.drawString(population, getWidth() - populationWidth - INSET_PX, position);
+    String populationText = String.format("%d", population.size());
+    int populationWidth = g.getFontMetrics().stringWidth(populationText);
+    g.drawString(populationText, getWidth() - populationWidth - INSET_PX, position);
   }
 
   /** Returns a new view for the given {@link Arena}. */
@@ -83,7 +65,7 @@ final class PopulationView extends JPanel {
     checkNotNull(arena);
 
     int width = 250;
-    int height = MICROBOT_BOUNDARY_SIZE_PX * arena.rows();
+    int height = 3 * MICROBOT_BOUNDARY_SIZE_PX * arena.rows() / 4;
 
     PopulationView populationView = new PopulationView(arena);
     populationView.setPreferredSize(new Dimension(width, height));
@@ -99,27 +81,6 @@ final class PopulationView extends JPanel {
     Path path = Paths.get(System.getProperty("user.dir"), "res", FONT_FILENAME);
     try (InputStream inputStream = Files.newInputStream(path)) {
       return Font.createFont(Font.TRUETYPE_FONT, inputStream).deriveFont(FONT_SIZE);
-    }
-  }
-
-  /** A snapshot of a microbot population at some point in time. */
-  private static final class MicrobotSnapshot {
-    private final String name;
-    private final int populationSize;
-    private final Color color;
-
-    private MicrobotSnapshot(String name, int populationSize, Color color) {
-      this.name = name;
-      this.populationSize = populationSize;
-      this.color = color;
-    }
-
-    /** Returns a snapshot of the given entry. */
-    private static MicrobotSnapshot of(Entry<String, Collection<Microbot>> entry) {
-      return new MicrobotSnapshot(
-          entry.getKey(),
-          entry.getValue().size(),
-          entry.getValue().stream().findAny().map(Microbot::color).orElse(Color.WHITE));
     }
   }
 }

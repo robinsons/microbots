@@ -46,8 +46,7 @@ final class Arena {
   Optional<Microbot> getFacedMicrobot(Microbot microbot) {
     Direction direction = microbot.facing();
     return microbotAt(
-        microbot.row() + direction.rowOffset(),
-        microbot.column() + direction.columnOffset());
+        microbot.row() + direction.rowOffset(), microbot.column() + direction.columnOffset());
   }
 
   /**
@@ -162,8 +161,8 @@ final class Arena {
       int column = 0;
 
       while (grid.contains(row, column)) {
-        row = (int)(rows * Math.random());
-        column = (int)(columns * Math.random());
+        row = (int) (rows * Math.random());
+        column = (int) (columns * Math.random());
       }
 
       microbot.setRow(row);

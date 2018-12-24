@@ -140,8 +140,13 @@ public final class Simulation {
       // View parameters.
       ArenaView arenaView = ArenaView.of(arena);
       PopulationView populationView = PopulationView.of(arena);
+      HistogramView histogramView = HistogramView.of(arena);
       Window window =
-          Window.builder().setArenaView(arenaView).setPopulationView(populationView).build();
+          Window.builder()
+              .setArenaView(arenaView)
+              .setPopulationView(populationView)
+              .setHistogramView(histogramView)
+              .build();
 
       return new Simulation(microbots, arena, window);
     }

@@ -5,7 +5,6 @@ package microbots.core;
  * adjacency.
  */
 enum Direction {
-
   NORTH(-1, 0),
   EAST(0, 1),
   SOUTH(1, 0),
@@ -40,8 +39,8 @@ enum Direction {
 
   /**
    * Returns the next direction after {@code this} in the {@link Direction} enum. The order of
-   * elements in this enum has been defined in such a way that this is equivalent to performing a
-   * 90 degree clockwise rotation.
+   * elements in this enum has been defined in such a way that this is equivalent to performing a 90
+   * degree clockwise rotation.
    */
   Direction next() {
     return values()[(ordinal() + 1) % 4];
@@ -69,6 +68,6 @@ enum Direction {
 
   /** Returns a random direction (selected uniformly). */
   static Direction random() {
-    return values()[(int)(4 * Math.random())];
+    return values()[(int) (4 * Math.random())];
   }
 }
