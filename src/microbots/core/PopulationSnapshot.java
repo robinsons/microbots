@@ -71,7 +71,7 @@ final class PopulationSnapshot {
         List<PopulationSnapshot> snapshots = ARENA_SNAPSHOTS.get(arena);
 
         if (!snapshots.isEmpty()) {
-          // Snapshots are stored in order rom most to least recent.
+          // Snapshots are stored in order from most to least recent.
           PopulationSnapshot mostRecentSnapshot = snapshots.get(0);
           if (mostRecentSnapshot.creationTimeMillis() + maxAgeInMillis >= currentTimeMillis) {
             return mostRecentSnapshot;
