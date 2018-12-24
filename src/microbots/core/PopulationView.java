@@ -13,7 +13,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
@@ -25,6 +27,9 @@ final class PopulationView extends JPanel {
   private static final float FONT_SIZE = 24f;
   private static final int INSET_PX = 10;
   private static final long UPDATE_FREQUENCY_MILLIS = 500L;
+
+  private static final Comparator<MicrobotSnapshot> DESCENDING_BY_POPULATION_SIZE =
+      Comparator.<MicrobotSnapshot>comparingInt(snapshot -> snapshot.populationSize).reversed();
 
   private long lastUpdateTimeMillis;
   private ImmutableList<MicrobotSnapshot> snapshots;
@@ -39,7 +44,8 @@ final class PopulationView extends JPanel {
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
 
-    if (System.currentTimeMillis() - lastUpdateTimeMillis >= UPDATE_FREQUENCY_MILLIS || snapshots == null) {
+    if (System.currentTimeMillis() - lastUpdateTimeMillis >= UPDATE_FREQUENCY_MILLIS
+        || snapshots == null) {
       lastUpdateTimeMillis = System.currentTimeMillis();
       snapshots =
           arena
@@ -50,20 +56,8 @@ final class PopulationView extends JPanel {
               .asMap()
               .entrySet()
               .stream()
-              .map(
-                  entry ->
-                      new MicrobotSnapshot(
-                          entry.getKey(),
-                          entry.getValue().size(),
-                          entry
-                              .getValue()
-                              .stream()
-                              .findAny()
-                              .map(Microbot::color)
-                              .orElse(Color.WHITE)))
-              .sorted(
-                  Comparator.<MicrobotSnapshot>comparingInt(snapshot -> snapshot.populationSize)
-                      .reversed())
+              .map(MicrobotSnapshot::of)
+              .sorted(DESCENDING_BY_POPULATION_SIZE)
               .collect(ImmutableList.toImmutableList());
     }
 
@@ -118,6 +112,14 @@ final class PopulationView extends JPanel {
       this.name = name;
       this.populationSize = populationSize;
       this.color = color;
+    }
+
+    /** Returns a snapshot of the given entry. */
+    private static MicrobotSnapshot of(Entry<String, Collection<Microbot>> entry) {
+      return new MicrobotSnapshot(
+          entry.getKey(),
+          entry.getValue().size(),
+          entry.getValue().stream().findAny().map(Microbot::color).orElse(Color.WHITE));
     }
   }
 }
