@@ -1,28 +1,24 @@
 package microbots.core;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.ListMultimap;
 import java.awt.Color;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 /** Represents a snapshot of all microbot populations at a given point in time. */
 final class PopulationSnapshot {
 
-  private static final ListMultimap<Arena, PopulationSnapshot> ARENA_SNAPSHOTS =
-      ArrayListMultimap.create();
-
+  private final Arena arena;
   private final long creationTimeMillis;
   private final ImmutableList<Population> populations;
 
-  private PopulationSnapshot(ImmutableList<Population> populations, long creationTimeMillis) {
+  private PopulationSnapshot(
+      Arena arena, ImmutableList<Population> populations, long creationTimeMillis) {
+    this.arena = arena;
     this.populations = populations;
     this.creationTimeMillis = creationTimeMillis;
   }
@@ -37,65 +33,33 @@ final class PopulationSnapshot {
     return creationTimeMillis;
   }
 
-  /** Starts a query for a snapshot of the specified arena. */
-  static Query of(Arena arena) {
-    return new Query(arena);
-  }
-
-  /** Allows for filtering a snapshot by some constraints. */
-  static final class Query {
-
-    private long maxAgeInMillis = 0L;
-
-    private final Arena arena;
-
-    private Query(Arena arena) {
-      this.arena = checkNotNull(arena);
-    }
-
-    /**
-     * Sets how old the snapshot can be. If a snapshot exists that is not older than the specified
-     * age, then it may be returned rather than creating a new snapshot.
-     */
-    Query withMaxStaleness(long maxAgeInMillis) {
-      checkArgument(maxAgeInMillis >= 0L, "maxAgeInMillis must be non-negative.");
-      this.maxAgeInMillis = maxAgeInMillis;
+  /**
+   * Returns this snapshot if it is less than the specified age. If it is too old, returns a new
+   * snapshot instead.
+   */
+  PopulationSnapshot refreshIfOlderThan(long maxAgeInMillis) {
+    if (creationTimeMillis + maxAgeInMillis >= System.currentTimeMillis()) {
       return this;
     }
+    return of(arena);
+  }
 
-    /** Fetches a snapshot given the current query's constraints. */
-    PopulationSnapshot get() {
-      long currentTimeMillis = System.currentTimeMillis();
+  /** Returns a new snapshot of the given arena. */
+  static PopulationSnapshot of(Arena arena) {
+    checkNotNull(arena);
 
-      synchronized (ARENA_SNAPSHOTS) {
-        List<PopulationSnapshot> snapshots = ARENA_SNAPSHOTS.get(arena);
-
-        if (!snapshots.isEmpty()) {
-          // Snapshots are stored in order from most to least recent.
-          PopulationSnapshot mostRecentSnapshot = snapshots.get(0);
-          if (mostRecentSnapshot.creationTimeMillis() + maxAgeInMillis >= currentTimeMillis) {
-            return mostRecentSnapshot;
-          }
-        }
-
-        ImmutableList<Population> populations =
-            arena
-                .microbots()
-                .stream()
-                .collect(
-                    ImmutableSetMultimap.toImmutableSetMultimap(
-                        Microbot::name, Function.identity()))
-                .asMap()
-                .entrySet()
-                .stream()
-                .map(Population::from)
-                .collect(ImmutableList.toImmutableList());
-
-        PopulationSnapshot snapshot = new PopulationSnapshot(populations, currentTimeMillis);
-        snapshots.add(0, snapshot);
-        return snapshot;
-      }
-    }
+    ImmutableList<Population> populations =
+        arena
+            .microbots()
+            .stream()
+            .collect(
+                ImmutableSetMultimap.toImmutableSetMultimap(Microbot::name, Function.identity()))
+            .asMap()
+            .entrySet()
+            .stream()
+            .map(Population::from)
+            .collect(ImmutableList.toImmutableList());
+    return new PopulationSnapshot(arena, populations, System.currentTimeMillis());
   }
 
   /** Represents the population of a specific microbot type at a point in time. */

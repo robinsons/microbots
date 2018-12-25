@@ -28,18 +28,17 @@ final class PopulationView extends JPanel {
   private static final Comparator<Population> DESCENDING_BY_POPULATION_SIZE =
       Comparator.comparingInt(Population::size).reversed();
 
-  private final Arena arena;
+  private PopulationSnapshot snapshot;
 
-  private PopulationView(Arena arena) {
-    this.arena = arena;
+  private PopulationView(PopulationSnapshot snapshot) {
+    this.snapshot = snapshot;
   }
 
   @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
 
-    PopulationSnapshot snapshot =
-        PopulationSnapshot.of(arena).withMaxStaleness(UPDATE_FREQUENCY_MILLIS).get();
+    snapshot = snapshot.refreshIfOlderThan(UPDATE_FREQUENCY_MILLIS);
     ImmutableList<Population> populations =
         ImmutableList.sortedCopyOf(DESCENDING_BY_POPULATION_SIZE, snapshot.populations());
 
@@ -67,7 +66,7 @@ final class PopulationView extends JPanel {
     int width = 250;
     int height = 3 * MICROBOT_BOUNDARY_SIZE_PX * arena.rows() / 4;
 
-    PopulationView populationView = new PopulationView(arena);
+    PopulationView populationView = new PopulationView(PopulationSnapshot.of(arena));
     populationView.setPreferredSize(new Dimension(width, height));
     populationView.setBackground(Color.DARK_GRAY);
     populationView.setFont(loadFont());
