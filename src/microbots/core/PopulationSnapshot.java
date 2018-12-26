@@ -3,7 +3,9 @@ package microbots.core;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Maps;
 import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
@@ -23,9 +25,19 @@ final class PopulationSnapshot {
     this.creationTimeMillis = creationTimeMillis;
   }
 
+  /** Returns the sum of the populations of each microbot type. */
+  int globalPopulation() {
+    return populations.stream().mapToInt(Population::size).sum();
+  }
+
   /** Returns the microbot populations of this snapshot. */
   ImmutableList<Population> populations() {
     return populations;
+  }
+
+  /** Returns the microbot populations of this snapshot indexed by population name. */
+  ImmutableMap<String, Population> populationsByName() {
+    return Maps.uniqueIndex(populations, Population::name);
   }
 
   /** Returns the time when this snapshot was created, in milliseconds. */
@@ -48,7 +60,7 @@ final class PopulationSnapshot {
 
   /** Returns whether or not this snapshot is older than the specified age in milliseconds. */
   boolean isOlderThan(long ageInMillis) {
-    return System.currentTimeMillis() - creationTimeMillis() > ageInMillis;
+    return System.currentTimeMillis() - creationTimeMillis > ageInMillis;
   }
 
   /** Returns a new snapshot of the given arena. */

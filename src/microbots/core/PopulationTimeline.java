@@ -5,19 +5,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.Iterator;
-import microbots.core.PopulationSnapshot.Population;
 
 /**
  * Tracks a sequence of {@link PopulationSnapshot PopulationSnapshots} for monitoring microbot
  * populations over time.
  */
 final class PopulationTimeline {
-
-  private static final Comparator<Population> ALPHABETICAL_BY_NAME =
-      Comparator.comparing(Population::name);
 
   private final Deque<PopulationSnapshot> snapshots;
   private final long updateFrequencyInMillis;
@@ -30,7 +25,15 @@ final class PopulationTimeline {
     this.maxAgeInMillis = maxAgeInMillis;
   }
 
-  /** Returns the {@link PopulationSnapshot snapshots} in this timeline. */
+  /** Returns the oldest snapshot in the timeline. */
+  PopulationSnapshot oldest() {
+    return snapshots.getFirst();
+  }
+
+  /**
+   * Returns the {@link PopulationSnapshot snapshots} in this timeline, sorted from oldest to
+   * newest.
+   */
   ImmutableList<PopulationSnapshot> snapshots() {
     // Note: must take new snapshot before clearing expired ones, otherwise it is possible to clear
     // all snapshots before a new one can be taken.
