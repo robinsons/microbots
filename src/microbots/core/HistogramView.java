@@ -6,21 +6,19 @@ import static microbots.core.ArenaView.MICROBOT_BOUNDARY_SIZE_PX;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.util.Comparator;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import microbots.core.PopulationSnapshot.Population;
 
 /** Shows a histogram displaying microbot populations over time. */
 final class HistogramView extends JPanel {
 
-  private static final Comparator<Population> ALPHABETICAL_BY_NAME =
-      Comparator.comparing(Population::name);
+  private static final long TIMELINE_UPDATE_FREQUENCY_MILLIS = 250L;
+  private static final long TIMELINE_RETENTION_PERIOD_MILLIS = 5000L;
 
-  private final Arena arena;
+  private final PopulationTimeline timeline;
 
-  private HistogramView(Arena arena) {
-    this.arena = arena;
+  private HistogramView(PopulationTimeline timeline) {
+    this.timeline = timeline;
   }
 
   @Override
@@ -35,7 +33,11 @@ final class HistogramView extends JPanel {
     int width = 250;
     int height = (MICROBOT_BOUNDARY_SIZE_PX * arena.rows() / 4) + 1;
 
-    HistogramView histogramView = new HistogramView(arena);
+    HistogramView histogramView =
+        new HistogramView(
+            PopulationTimeline.snapshot(arena)
+                .every(TIMELINE_UPDATE_FREQUENCY_MILLIS)
+                .retainForever());
     histogramView.setPreferredSize(new Dimension(width, height));
     histogramView.setBackground(Color.DARK_GRAY);
     histogramView.setBorder(BorderFactory.createRaisedBevelBorder());

@@ -13,8 +13,8 @@ import java.util.function.Function;
 final class PopulationSnapshot {
 
   private final Arena arena;
-  private final long creationTimeMillis;
   private final ImmutableList<Population> populations;
+  private final long creationTimeMillis;
 
   private PopulationSnapshot(
       Arena arena, ImmutableList<Population> populations, long creationTimeMillis) {
@@ -37,11 +37,18 @@ final class PopulationSnapshot {
    * Returns this snapshot if it is less than the specified age. If it is too old, returns a new
    * snapshot instead.
    */
-  PopulationSnapshot refreshIfOlderThan(long maxAgeInMillis) {
-    if (creationTimeMillis + maxAgeInMillis >= System.currentTimeMillis()) {
-      return this;
-    }
+  PopulationSnapshot refreshIfOlderThan(long ageInMillis) {
+    return isOlderThan(ageInMillis) ? refresh() : this;
+  }
+
+  /** Returns a new (more recent) snapshot of the same arena as this snapshot. */
+  PopulationSnapshot refresh() {
     return of(arena);
+  }
+
+  /** Returns whether or not this snapshot is older than the specified age in milliseconds. */
+  boolean isOlderThan(long ageInMillis) {
+    return System.currentTimeMillis() - creationTimeMillis() > ageInMillis;
   }
 
   /** Returns a new snapshot of the given arena. */
