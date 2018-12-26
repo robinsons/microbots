@@ -36,7 +36,9 @@ final class Arena {
 
   /** Returns all of the microbots currently in this arena. */
   ImmutableSet<Microbot> microbots() {
-    return ImmutableSet.copyOf(grid.values());
+    synchronized (grid) {
+      return ImmutableSet.copyOf(grid.values());
+    }
   }
 
   /**
@@ -56,11 +58,13 @@ final class Arena {
   void moveMicrobot(Microbot microbot) {
     checkNotNull(microbot);
     Direction direction = microbot.facing();
-    if (getObstacleRelativeToMicrobot(microbot, direction) == Obstacle.NONE) {
-      grid.remove(microbot.row(), microbot.column());
-      microbot.setRow(microbot.row() + direction.rowOffset());
-      microbot.setColumn(microbot.column() + direction.columnOffset());
-      grid.put(microbot.row(), microbot.column(), microbot);
+    synchronized (grid) {
+      if (getObstacleRelativeToMicrobot(microbot, direction) == Obstacle.NONE) {
+        grid.remove(microbot.row(), microbot.column());
+        microbot.setRow(microbot.row() + direction.rowOffset());
+        microbot.setColumn(microbot.column() + direction.columnOffset());
+        grid.put(microbot.row(), microbot.column(), microbot);
+      }
     }
   }
 
