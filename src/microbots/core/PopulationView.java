@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,6 +39,8 @@ final class PopulationView extends JPanel {
   @Override
   public void paintComponent(Graphics g) {
     super.paintComponent(g);
+    Graphics2D g2 = (Graphics2D) g;
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
     snapshot = snapshot.refreshIfOlderThan(UPDATE_FREQUENCY_MILLIS);
     ImmutableList<Population> populations =
@@ -45,18 +49,27 @@ final class PopulationView extends JPanel {
     int position = 0;
     for (Population population : populations) {
       position += FONT_SIZE;
-      showMicrobotPopulation(population, position, g);
+      showMicrobotPopulation(population, position, g2);
     }
   }
 
   /** Shows the indicated microbot's population. */
   private void showMicrobotPopulation(Population population, int position, Graphics g) {
     g.setColor(population.color());
-    g.drawString(population.name(), INSET_PX, position);
+    drawStringWithShadow(population.name(), population.color(), INSET_PX, position, g);
 
     String populationText = String.format("%d", population.size());
     int populationWidth = g.getFontMetrics().stringWidth(populationText);
-    g.drawString(populationText, getWidth() - populationWidth - INSET_PX, position);
+    drawStringWithShadow(
+        populationText, population.color(), getWidth() - populationWidth - INSET_PX, position, g);
+  }
+
+  /** Draws the given text at the position with the provided color and a shadow behind it. */
+  private static void drawStringWithShadow(String text, Color textColor, int x, int y, Graphics g) {
+    g.setColor(Color.BLACK);
+    g.drawString(text, x - 1, y - 1);
+    g.setColor(textColor);
+    g.drawString(text, x, y);
   }
 
   /** Returns a new view for the given {@link Arena}. */
