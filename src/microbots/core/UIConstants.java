@@ -4,6 +4,7 @@ import java.awt.Color;
 
 /** Holds constants related to the UI aspects of the simulation. */
 final class UIConstants {
+  private UIConstants() {}
 
   static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
 
