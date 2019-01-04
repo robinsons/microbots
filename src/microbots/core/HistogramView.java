@@ -23,7 +23,7 @@ import microbots.core.PopulationSnapshot.Population;
 /** Shows a histogram displaying microbot populations over time. */
 final class HistogramView extends JPanel {
 
-  private static final long TIMELINE_UPDATE_FREQUENCY_MILLIS = 125L;
+  private static final long TIMELINE_UPDATE_FREQUENCY_MILLIS = 100L;
   private static final long TIMELINE_RETENTION_PERIOD_MILLIS = 5000L;
 
   private static final double TIMELINE_FILL_RATIO = 0.8;
