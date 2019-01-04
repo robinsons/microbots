@@ -1,12 +1,13 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.ArenaView.MICROBOT_BOUNDARY_SIZE_PX;
+import static microbots.core.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.UIConstants.INFO_CONTAINER_WIDTH_PX;
+import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -25,13 +26,15 @@ final class HistogramView extends JPanel {
   private static final long TIMELINE_UPDATE_FREQUENCY_MILLIS = 125L;
   private static final long TIMELINE_RETENTION_PERIOD_MILLIS = 5000L;
 
+  private static final double TIMELINE_FILL_RATIO = 0.8;
+
   private static final Stroke POPULATION_STROKE =
       new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
   private static final Comparator<Population> ALPHABETICAL_BY_NAME =
       Comparator.comparing(Population::name);
 
-  private long xOffsetMillis;
+  private long xOffset;
 
   private final PopulationTimeline timeline;
 
@@ -48,11 +51,12 @@ final class HistogramView extends JPanel {
     PopulationSnapshot oldestSnapshot = timeline.oldest();
 
     long elapsedTimeMillis = System.currentTimeMillis() - oldestSnapshot.creationTimeMillis();
-    xOffsetMillis =
-        elapsedTimeMillis > TIMELINE_RETENTION_PERIOD_MILLIS
-            ? elapsedTimeMillis - TIMELINE_RETENTION_PERIOD_MILLIS
-            : 0L;
+    long xAbsolute = getWidth() * elapsedTimeMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
+    xOffset = Math.min(0L, (long) (TIMELINE_FILL_RATIO * getWidth() - xAbsolute));
 
+    // By using the oldest populations we ensure that we include microbot types that have been
+    // completely eliminated in the newer snapshots. These populations will slowly fall off the
+    // histogram when enough time has passed.
     ImmutableList<Population> oldestPopulations =
         ImmutableList.sortedCopyOf(ALPHABETICAL_BY_NAME, oldestSnapshot.populations());
     oldestPopulations.forEach(
@@ -96,16 +100,16 @@ final class HistogramView extends JPanel {
       return;
     }
 
-    xPoints.add(computeXCoordinate(snapshot, startTimeMillis, xOffsetMillis));
+    xPoints.add(computeXCoordinate(snapshot, startTimeMillis, xOffset, getWidth()));
     yPoints.add(
         computeYCoordinate(populationsByName.get(populationName), globalPopulation, getHeight()));
   }
 
   private static int computeXCoordinate(
-      PopulationSnapshot snapshot, long startTimeMillis, long xOffsetMillis) {
-    long distanceFromStartInMillis =
-        snapshot.creationTimeMillis() - startTimeMillis - xOffsetMillis;
-    return (int) (5 * distanceFromStartInMillis / TIMELINE_UPDATE_FREQUENCY_MILLIS);
+      PopulationSnapshot snapshot, long startTimeMillis, long xOffsetMillis, int componentWidth) {
+    long distanceFromStartInMillis = snapshot.creationTimeMillis() - startTimeMillis;
+    long absoluteX = componentWidth * distanceFromStartInMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
+    return (int) (absoluteX + xOffsetMillis);
   }
 
   private static int computeYCoordinate(
@@ -128,8 +132,8 @@ final class HistogramView extends JPanel {
   static HistogramView of(Arena arena) {
     checkNotNull(arena);
 
-    int width = 250;
-    int height = (MICROBOT_BOUNDARY_SIZE_PX * arena.rows() / 4) + 1;
+    int width = INFO_CONTAINER_WIDTH_PX;
+    int height = (MICROBOT_OUTER_SIZE_PX * arena.rows() / 4) + 1;
 
     HistogramView histogramView =
         new HistogramView(
@@ -137,7 +141,7 @@ final class HistogramView extends JPanel {
                 .every(TIMELINE_UPDATE_FREQUENCY_MILLIS)
                 .retainFor(TIMELINE_RETENTION_PERIOD_MILLIS));
     histogramView.setPreferredSize(new Dimension(width, height));
-    histogramView.setBackground(Color.DARK_GRAY);
+    histogramView.setBackground(BACKGROUND_COLOR);
     histogramView.setBorder(BorderFactory.createRaisedBevelBorder());
 
     return histogramView;

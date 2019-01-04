@@ -1,7 +1,9 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.ArenaView.MICROBOT_BOUNDARY_SIZE_PX;
+import static microbots.core.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.UIConstants.INFO_CONTAINER_WIDTH_PX;
+import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 
 import com.google.common.collect.ImmutableList;
 import java.awt.Color;
@@ -55,7 +57,6 @@ final class PopulationView extends JPanel {
 
   /** Shows the indicated microbot's population. */
   private void showMicrobotPopulation(Population population, int position, Graphics g) {
-    g.setColor(population.color());
     drawStringWithShadow(population.name(), population.color(), INSET_PX, position, g);
 
     String populationText = String.format("%d", population.size());
@@ -76,12 +77,12 @@ final class PopulationView extends JPanel {
   static PopulationView of(Arena arena) throws Exception {
     checkNotNull(arena);
 
-    int width = 250;
-    int height = 3 * MICROBOT_BOUNDARY_SIZE_PX * arena.rows() / 4;
+    int width = INFO_CONTAINER_WIDTH_PX;
+    int height = 3 * MICROBOT_OUTER_SIZE_PX * arena.rows() / 4;
 
     PopulationView populationView = new PopulationView(PopulationSnapshot.of(arena));
     populationView.setPreferredSize(new Dimension(width, height));
-    populationView.setBackground(Color.DARK_GRAY);
+    populationView.setBackground(BACKGROUND_COLOR);
     populationView.setFont(loadFont());
     populationView.setBorder(BorderFactory.createRaisedBevelBorder());
 

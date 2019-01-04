@@ -1,10 +1,11 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Maps;
 import java.awt.Color;
 import java.util.Collection;
@@ -71,13 +72,12 @@ final class PopulationSnapshot {
         arena
             .microbots()
             .stream()
-            .collect(
-                ImmutableSetMultimap.toImmutableSetMultimap(Microbot::name, Function.identity()))
+            .collect(toImmutableSetMultimap(Microbot::name, Function.identity()))
             .asMap()
             .entrySet()
             .stream()
             .map(Population::from)
-            .collect(ImmutableList.toImmutableList());
+            .collect(toImmutableList());
     return new PopulationSnapshot(arena, populations, System.currentTimeMillis());
   }
 
