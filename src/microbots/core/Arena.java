@@ -14,6 +14,9 @@ import microbots.Surroundings;
 /** The arena is where microbots do battle. */
 final class Arena {
 
+  private static final int DEFAULT_ROWS = 75;
+  private static final int DEFAULT_COLUMNS = 100;
+
   private final Table<Integer, Integer, Microbot> grid;
   private final int rows;
   private final int columns;
@@ -53,7 +56,7 @@ final class Arena {
 
   /**
    * Moves the given microbot one cell in the direction it is currently facing, provided that the
-   * destination cell is unoccupied.
+   * destination cell is unoccupied and is within the bounds of the arena.
    */
   void moveMicrobot(Microbot microbot) {
     checkNotNull(microbot);
@@ -61,8 +64,8 @@ final class Arena {
     synchronized (grid) {
       if (getObstacleRelativeToMicrobot(microbot, direction) == Obstacle.NONE) {
         grid.remove(microbot.row(), microbot.column());
-        microbot.setRow(microbot.row() + direction.rowOffset());
-        microbot.setColumn(microbot.column() + direction.columnOffset());
+        microbot.setPosition(
+            microbot.row() + direction.rowOffset(), microbot.column() + direction.columnOffset());
         grid.put(microbot.row(), microbot.column(), microbot);
       }
     }
@@ -77,10 +80,10 @@ final class Arena {
   Surroundings getMicrobotSurroundings(Microbot microbot) {
     checkNotNull(microbot);
     return new Surroundings(
-        getObstacleRelativeToMicrobot(microbot, microbot.facing()),
-        getObstacleRelativeToMicrobot(microbot, microbot.facing().previous()),
-        getObstacleRelativeToMicrobot(microbot, microbot.facing().next()),
-        getObstacleRelativeToMicrobot(microbot, microbot.facing().opposite()));
+        getObstacleRelativeToMicrobot(microbot, microbot.facing()), // front
+        getObstacleRelativeToMicrobot(microbot, microbot.facing().clockwise270()), // left
+        getObstacleRelativeToMicrobot(microbot, microbot.facing().clockwise90()), // right
+        getObstacleRelativeToMicrobot(microbot, microbot.facing().clockwise180())); // back
   }
 
   /** Returns the obstacle in the given direction relative to the indicated microbot. */
@@ -96,8 +99,8 @@ final class Arena {
   }
 
   /**
-   * Returns the microbot location at the specified position, or else {@link Optional#empty()} if
-   * the position is unoccupied.
+   * Returns the microbot located at the specified position, or else {@link Optional#empty()} if the
+   * position is unoccupied.
    */
   private Optional<Microbot> microbotAt(int row, int column) {
     return Optional.ofNullable(grid.get(row, column));
@@ -111,16 +114,16 @@ final class Arena {
     return 0 <= row && row < rows && 0 <= column && column < columns;
   }
 
-  /** Returns a new {@link Builder} for constructing arenas. */
+  /** Returns a new {@link Builder} for constructing arenas. Pre-populates some default values. */
   static Builder builder() {
-    return new Builder();
+    return new Builder().withRows(DEFAULT_ROWS).withColumns(DEFAULT_COLUMNS);
   }
 
   /** Builder class for creating arena instances. */
   static final class Builder {
 
-    private int rows = 75;
-    private int columns = 100;
+    private int rows;
+    private int columns;
     private ImmutableList<Microbot> microbots = ImmutableList.of();
 
     /** Sets the number of rows in the arena. Must be positive. */
@@ -143,7 +146,7 @@ final class Arena {
       return this;
     }
 
-    /** Returns a new arena instance. Can only be called once. */
+    /** Returns a new arena instance. */
     Arena build() {
       checkArgument(
           rows * columns >= microbots.size(),
@@ -164,13 +167,14 @@ final class Arena {
       int row = 0;
       int column = 0;
 
+      // This approach becomes inefficient as the ratio of microbots to arena cells approaches 1.
+      // Consider refactoring if arenas are not sparsely populated.
       while (grid.contains(row, column)) {
         row = (int) (rows * Math.random());
         column = (int) (columns * Math.random());
       }
 
-      microbot.setRow(row);
-      microbot.setColumn(column);
+      microbot.setPosition(row, column);
       grid.put(row, column, microbot);
     }
   }

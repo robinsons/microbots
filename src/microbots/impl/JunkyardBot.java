@@ -6,6 +6,7 @@ import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
 import microbots.Surroundings;
 
+/** Example MPU implementation. The JunkyardBot roves in search of prey. */
 public final class JunkyardBot extends MicrobotProcessingUnit {
 
   private static final Color COLOR = new Color(0xf4414d);

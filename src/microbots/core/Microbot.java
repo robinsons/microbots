@@ -1,5 +1,6 @@
 package microbots.core;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.Color;
@@ -28,18 +29,18 @@ final class Microbot {
 
   /** @see MicrobotProcessingUnit#name() */
   String name() {
-    return mpu.name();
+    return firstNonNull(mpu.name(), mpu.getClass().getSimpleName());
   }
 
   /** @see MicrobotProcessingUnit#color() */
   Color color() {
-    return mpu.color();
+    return firstNonNull(mpu.color(), Color.WHITE);
   }
 
   /** @see MicrobotProcessingUnit#getAction(Surroundings) */
   Action getAction(Surroundings surroundings) {
     checkNotNull(surroundings);
-    return mpu.getAction(surroundings);
+    return firstNonNull(mpu.getAction(surroundings), Action.WAIT);
   }
 
   /** Returns the row this microbot is located at in the arena. */
@@ -52,13 +53,9 @@ final class Microbot {
     return column;
   }
 
-  /** Updates this microbot's {@link #row}. */
-  void setRow(int row) {
+  /** Updates this microbot's {@link #row} and {@link #column}. */
+  void setPosition(int row, int column) {
     this.row = row;
-  }
-
-  /** Updates this microbot's {@link #column}. */
-  void setColumn(int column) {
     this.column = column;
   }
 
@@ -69,12 +66,12 @@ final class Microbot {
 
   /** Rotates this microbot 90 degrees counterclockwise. */
   void rotateLeft() {
-    facing = facing.previous();
+    facing = facing.clockwise270();
   }
 
   /** Rotates this microbot 90 degrees clockwise. */
   void rotateRight() {
-    facing = facing.next();
+    facing = facing.clockwise90();
   }
 
   /**

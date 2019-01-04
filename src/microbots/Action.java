@@ -1,8 +1,8 @@
 package microbots;
 
 /**
- * The things a microbot may attempt to do on their turn. An action may not always succeed; for
- * example, a microbot attempting to move into a wall will simply stay put. A microbot must select
+ * The things a microbot may attempt to do on their turn. An action may not always succeed: for
+ * example, a microbot that attempts to move into a wall will simply stay put. A microbot must select
  * exactly one action to perform on their turn. If the action fails (e.g. because it was invalid),
  * then the microbot is <b>not</b> given the opportunity to select another.
  */

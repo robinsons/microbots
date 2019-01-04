@@ -29,9 +29,14 @@ import microbots.Surroundings;
  */
 public final class Simulation {
 
+  /** Simple functional interface to provide type clarity for the {@link #ACTION_DELEGATES} map. */
   @FunctionalInterface
   private interface ActionDelegate extends BiConsumer<Simulation, Microbot> {}
 
+  /**
+   * Maps {@link Action microbot actions} to {@link ActionDelegate delegates} for handling each
+   * action. Using a map allows us to avoid a large switch statement.
+   */
   private static final ImmutableMap<Action, ActionDelegate> ACTION_DELEGATES =
       ImmutableMap.of(
           Action.WAIT, Simulation::handleWait,
@@ -39,6 +44,12 @@ public final class Simulation {
           Action.ROTATE_LEFT, Simulation::handleRotateLeft,
           Action.ROTATE_RIGHT, Simulation::handleRotateRight,
           Action.HACK, Simulation::handleHack);
+
+  /**
+   * Specifies how long the simulation will sleep for between rounds. All microbots participating in
+   * the simulation will perform one action per round.
+   */
+  private static final long ROUND_DELAY_MILLIS = 125L;
 
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
@@ -56,17 +67,20 @@ public final class Simulation {
     window.setVisible(true);
 
     while (true) {
-      microbots.forEach(this::doTurn);
+      microbots.forEach(this::processAction);
       window.repaint();
-      Thread.sleep(125L);
+      Thread.sleep(ROUND_DELAY_MILLIS);
     }
   }
 
-  /** Performs a single turn for the specified microbot. */
-  private void doTurn(Microbot microbot) {
+  /** Performs a single action for the specified microbot. */
+  private void processAction(Microbot microbot) {
     Surroundings surroundings = arena.getMicrobotSurroundings(microbot);
     Action action = microbot.getAction(surroundings);
-    ACTION_DELEGATES.getOrDefault(action, Simulation::handleUnknownAction).accept(this, microbot);
+    ActionDelegate delegate =
+        ACTION_DELEGATES.getOrDefault(action, Simulation::handleUnknownAction);
+
+    delegate.accept(this, microbot);
   }
 
   /** Delegate for {@link Action#WAIT}. */
@@ -133,21 +147,14 @@ public final class Simulation {
       checkArgument(
           !mpuTypes.isEmpty(), "Must specify at least one MPU type to create a simulation.");
 
-      // Data model parameters.
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
-
-      // View parameters.
-      ArenaView arenaView = ArenaView.of(arena);
-      PopulationView populationView = PopulationView.of(arena);
-      HistogramView histogramView = HistogramView.of(arena);
       Window window =
           Window.builder()
-              .setArenaView(arenaView)
-              .setPopulationView(populationView)
-              .setHistogramView(histogramView)
+              .setArenaView(ArenaView.of(arena))
+              .setPopulationView(PopulationView.of(arena))
+              .setHistogramView(HistogramView.of(arena))
               .build();
-
       return new Simulation(microbots, arena, window);
     }
   }

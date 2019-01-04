@@ -6,6 +6,7 @@ import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
 import microbots.Surroundings;
 
+/** Example MPU implementation. The HiveBot tends to form clusters. */
 public final class HiveBot extends MicrobotProcessingUnit {
 
   private static final Color COLOR = new Color(0xeef442);

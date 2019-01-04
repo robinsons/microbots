@@ -5,6 +5,7 @@ import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Surroundings;
 
+/** Example MPU implementation. The ScrapPile does nothing... */
 public final class ScrapPile extends MicrobotProcessingUnit {
 
   private static final Color COLOR = new Color(0x4286f4);
