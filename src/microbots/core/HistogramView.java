@@ -133,7 +133,7 @@ final class HistogramView extends JPanel {
     checkNotNull(arena);
 
     int width = INFO_CONTAINER_WIDTH_PX;
-    int height = (MICROBOT_OUTER_SIZE_PX * arena.rows() / 4) + 1;
+    int height = MICROBOT_OUTER_SIZE_PX * arena.rows() / 4;
 
     HistogramView histogramView =
         new HistogramView(

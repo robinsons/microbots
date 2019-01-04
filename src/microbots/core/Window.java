@@ -1,8 +1,10 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static microbots.core.UIConstants.INFO_CONTAINER_WIDTH_PX;
 
-import javax.swing.BoxLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -48,14 +50,15 @@ final class Window extends JFrame {
       checkNotNull(histogramView);
 
       JPanel infoContainer = new JPanel();
-      infoContainer.setLayout(new BoxLayout(infoContainer, BoxLayout.Y_AXIS));
-      infoContainer.add(populationView);
-      infoContainer.add(histogramView);
+      infoContainer.setPreferredSize(new Dimension(INFO_CONTAINER_WIDTH_PX, arenaView.getHeight()));
+      infoContainer.setLayout(new BorderLayout(0, 0));
+      infoContainer.add(populationView, BorderLayout.CENTER);
+      infoContainer.add(histogramView, BorderLayout.SOUTH);
 
       JPanel mainContainer = new JPanel();
-      mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.X_AXIS));
-      mainContainer.add(arenaView);
-      mainContainer.add(infoContainer);
+      mainContainer.setLayout(new BorderLayout(0, 0));
+      mainContainer.add(arenaView, BorderLayout.CENTER);
+      mainContainer.add(infoContainer, BorderLayout.EAST);
 
       Window window = new Window();
       window.add(mainContainer);

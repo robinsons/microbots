@@ -6,7 +6,6 @@ import static microbots.core.UIConstants.MICROBOT_INNER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_PADDING_PX;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -41,8 +40,8 @@ final class ArenaView extends JPanel {
   static ArenaView of(Arena arena) {
     checkNotNull(arena);
 
-    int width = MICROBOT_OUTER_SIZE_PX * arena.columns();
-    int height = MICROBOT_OUTER_SIZE_PX * arena.rows();
+    int width = MICROBOT_OUTER_SIZE_PX * (arena.columns() - 1);
+    int height = MICROBOT_OUTER_SIZE_PX * (arena.rows() - 1);
 
     ArenaView arenaView = new ArenaView(arena);
     arenaView.setPreferredSize(new Dimension(width, height));
