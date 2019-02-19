@@ -69,13 +69,13 @@ final class Window extends JFrame {
      * scale):
      *
      * <pre>
-     *   +-----------------+----------------+
-     *   |    arenaView    | populationView |
-     *   |                 |                |
-     *   |                 |                |
-     *   +                 +----------------+
-     *   |                 | histogramView  |
-     *   +-----------------+----------------+
+     *   +-------------------+----------------+
+     *   |     arenaView     | populationView |
+     *   |                   |                |
+     *   |                   |                |
+     *   |                   +----------------+
+     *   |                   | histogramView  |
+     *   +-------------------+----------------+
      * </pre>
      */
     private void paintViews(Graphics2D g2) {
