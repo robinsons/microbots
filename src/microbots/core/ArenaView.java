@@ -6,25 +6,20 @@ import static microbots.core.UIConstants.MICROBOT_INNER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_PADDING_PX;
 
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 
 /** Shows the positions of the microbots in the arena. */
-final class ArenaView extends JPanel {
+final class ArenaView extends View {
 
   private final Arena arena;
 
-  private ArenaView(Arena arena) {
+  private ArenaView(Arena arena, int width, int height) {
+    super(width, height, BACKGROUND_COLOR);
     this.arena = arena;
   }
 
   @Override
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2 = (Graphics2D) g;
+  public void paint(Graphics2D g2) {
     arena.microbots().forEach(microbot -> drawMicrobot(microbot, g2));
   }
 
@@ -37,17 +32,10 @@ final class ArenaView extends JPanel {
   }
 
   /** Returns a new view of the given {@link Arena}. */
-  static ArenaView of(Arena arena) {
+  static ArenaView createFor(Arena arena) {
     checkNotNull(arena);
-
-    int width = MICROBOT_OUTER_SIZE_PX * (arena.columns() - 1);
-    int height = MICROBOT_OUTER_SIZE_PX * (arena.rows() - 1);
-
-    ArenaView arenaView = new ArenaView(arena);
-    arenaView.setPreferredSize(new Dimension(width, height));
-    arenaView.setBackground(BACKGROUND_COLOR);
-    arenaView.setBorder(BorderFactory.createRaisedBevelBorder());
-
-    return arenaView;
+    int width = MICROBOT_OUTER_SIZE_PX * arena.columns();
+    int height = MICROBOT_OUTER_SIZE_PX * arena.rows();
+    return new ArenaView(arena, width, height);
   }
 }

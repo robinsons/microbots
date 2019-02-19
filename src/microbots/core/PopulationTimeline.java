@@ -69,6 +69,26 @@ final class PopulationTimeline {
     return new Builder(arena);
   }
 
+  /** Builder interface for specifying the update frequency of a timeline. */
+  interface FrequencySpec {
+    /**
+     * Returns a new {@link RetentionSpec} based on this spec's parameters. Specifies that the
+     * resulting timeline should take a new snapshot at the specified interval. Note that snapshots
+     * are only taken on calls to {@link PopulationTimeline#snapshots()}, and so this value only
+     * configures a lower bound for how frequently snapshots are taken.
+     */
+    RetentionSpec every(long updateFrequencyInMillis);
+
+    /**
+     * Returns a new {@link RetentionSpec} based on this spec's parameters. Specifies that the
+     * resulting timeline should take a new snapshot each time {@link
+     * PopulationTimeline#snapshots()} is queried.
+     */
+    default RetentionSpec onEveryQuery() {
+      return every(1L);
+    }
+  }
+
   /** Builder for specifying the max age of snapshots in a timeline. */
   interface RetentionSpec {
     /**
@@ -79,20 +99,9 @@ final class PopulationTimeline {
 
     /**
      * Returns a new timeline from the parameters of this spec. The timeline will retain snapshots
-     * for the amount of time specified.
+     * up to the specified {@code maxAgeInMillis}.
      */
     PopulationTimeline retainFor(long maxAgeInMillis);
-  }
-
-  /** Builder interface for specifying the update frequency of a timeline. */
-  interface FrequencySpec {
-    /**
-     * Returns a new {@link RetentionSpec} based on this spec's parameters. Specifies that the
-     * resulting timeline should take a new snapshot at the specified interval. Note that snapshots
-     * are only taken on calls to {@link PopulationTimeline#snapshots()}, and so this value only
-     * configures a lower bound for how frequently snapshots are taken.
-     */
-    RetentionSpec every(long updateFrequencyInMillis);
   }
 
   /** Builder for specifying the update frequency of the timeline. */

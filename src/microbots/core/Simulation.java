@@ -190,12 +190,8 @@ public final class Simulation {
 
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
-      Window window =
-          Window.builder()
-              .setArenaView(ArenaView.of(arena))
-              .setPopulationView(PopulationView.of(arena))
-              .setHistogramView(HistogramView.of(arena))
-              .build();
+      Window window = Window.createFor(arena);
+
       return new Simulation(microbots, arena, victoryCondition, window);
     }
   }

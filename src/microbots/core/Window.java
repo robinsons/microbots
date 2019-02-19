@@ -1,10 +1,14 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.UIConstants.INFO_CONTAINER_WIDTH_PX;
+import static microbots.core.GraphicsUtil.drawAndPreserveTransform;
+import static microbots.core.GraphicsUtil.drawWithinBounds;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -13,63 +17,103 @@ final class Window extends JFrame {
 
   private static final String WINDOW_TITLE = "Microbot Battle Arena";
 
-  /** Returns a new {@link Builder} for creating window instances. */
-  static Builder builder() {
-    return new Builder();
+  /** Returns a new {@link Window} that will display events in the specified {@link Arena}. */
+  static Window createFor(Arena arena) {
+    checkNotNull(arena);
+
+    Window window = new Window();
+    window.setTitle(WINDOW_TITLE);
+    window.setResizable(false);
+    window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    // Must add components and pack AFTER invoking setResizable; otherwise we encounter excess
+    // border around the content (on Windows, at least).
+    window.add(WindowPanel.createFor(arena));
+    window.pack();
+
+    // Centers the window on the screen.
+    window.setLocationRelativeTo(null);
+
+    return window;
   }
 
-  /** Builder for creating window instances. */
-  static final class Builder {
+  /**
+   * This is the root (and sole) content panel for the {@link Window}. Since Swing's layouts are a
+   * bit clumsy to work with, we opt instead for a single panel that handles rendering each subview.
+   */
+  private static final class WindowPanel extends JPanel {
 
-    private JPanel arenaView;
-    private JPanel populationView;
-    private JPanel histogramView;
+    private static final int BORDER_PADDING_PX = 1;
+    private static final Color BACKGROUND_COLOR = Color.BLACK;
 
-    /** Sets the component that will show the main arena where microbots are battling. */
-    Builder setArenaView(JPanel arenaView) {
+    private final View arenaView;
+    private final View populationView;
+    private final View histogramView;
+
+    private WindowPanel(View arenaView, View populationView, View histogramView) {
       this.arenaView = arenaView;
-      return this;
-    }
-
-    /** Sets the component that will display microbot population levels during a battle. */
-    Builder setPopulationView(JPanel populationView) {
       this.populationView = populationView;
-      return this;
-    }
-
-    /** Sets the component that will display microbot population history during a battle. */
-    Builder setHistogramView(JPanel histogramView) {
       this.histogramView = histogramView;
-      return this;
     }
 
-    /** Returns a new {@link Window} instance based on the parameters of this builder. */
-    Window build() {
-      checkNotNull(arenaView);
-      checkNotNull(populationView);
-      checkNotNull(histogramView);
+    @Override
+    public void paintComponent(Graphics g) {
+      super.paintComponent(g);
+      Graphics2D g2 = (Graphics2D) g;
+      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      drawAndPreserveTransform(g2, this::paintViews);
+    }
 
-      JPanel infoContainer = new JPanel();
-      infoContainer.setPreferredSize(new Dimension(INFO_CONTAINER_WIDTH_PX, arenaView.getHeight()));
-      infoContainer.setLayout(new BorderLayout(0, 0));
-      infoContainer.add(populationView, BorderLayout.CENTER);
-      infoContainer.add(histogramView, BorderLayout.SOUTH);
+    /**
+     * Draws each of the subviews to this panel. They are laid out roughly as follows (not to
+     * scale):
+     *
+     * <pre>
+     *   +-----------------+----------------+
+     *   |    arenaView    | populationView |
+     *   |                 |                |
+     *   |                 |                |
+     *   +                 +----------------+
+     *   |                 | histogramView  |
+     *   +-----------------+----------------+
+     * </pre>
+     */
+    private void paintViews(Graphics2D g2) {
+      g2.translate(BORDER_PADDING_PX, BORDER_PADDING_PX);
+      paintView(g2, arenaView);
 
-      JPanel mainContainer = new JPanel();
-      mainContainer.setLayout(new BorderLayout(0, 0));
-      mainContainer.add(arenaView, BorderLayout.CENTER);
-      mainContainer.add(infoContainer, BorderLayout.EAST);
+      g2.translate(arenaView.width() + BORDER_PADDING_PX, 0);
+      paintView(g2, populationView);
 
-      Window window = new Window();
-      window.add(mainContainer);
-      window.pack();
+      g2.translate(0, populationView.height() + BORDER_PADDING_PX);
+      paintView(g2, histogramView);
+    }
 
-      window.setTitle(WINDOW_TITLE);
-      window.setResizable(false);
-      window.setLocationRelativeTo(null);
-      window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    /** Paints an individual subview. */
+    private static void paintView(Graphics2D g2, View view) {
+      drawWithinBounds(g2, 0, 0, view.width(), view.height(), view::paintWithBackground);
+    }
 
-      return window;
+    /** Returns a new {@link WindowPanel}, with subviews, for the designated {@link Arena}. */
+    private static WindowPanel createFor(Arena arena) {
+      checkNotNull(arena);
+
+      View arenaView = ArenaView.createFor(arena);
+      View populationView = PopulationView.createFor(arena);
+      View histogramView = HistogramView.createFor(arena);
+
+      WindowPanel windowPanel = new WindowPanel(arenaView, populationView, histogramView);
+      windowPanel.setBackground(BACKGROUND_COLOR);
+      windowPanel.setPreferredSize(
+          new Dimension(
+              arenaView.width()
+                  + Math.max(populationView.width(), histogramView.width())
+                  + 3 * BORDER_PADDING_PX,
+              Math.max(
+                  arenaView.height() + 2 * BORDER_PADDING_PX,
+                  populationView.height() + histogramView.height() + 3 * BORDER_PADDING_PX)));
+
+      return windowPanel;
     }
   }
 }

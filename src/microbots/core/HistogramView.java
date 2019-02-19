@@ -2,31 +2,25 @@ package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.INFO_CONTAINER_WIDTH_PX;
 import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
+import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.awt.BasicStroke;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
 import microbots.core.PopulationSnapshot.Population;
 
 /** Shows a histogram displaying microbot populations over time. */
-final class HistogramView extends JPanel {
+final class HistogramView extends View {
 
-  private static final long TIMELINE_UPDATE_FREQUENCY_MILLIS = 100L;
+  private static final int Y_THRESHOLD_PX = 3;
   private static final long TIMELINE_RETENTION_PERIOD_MILLIS = 5000L;
-
-  private static final double TIMELINE_FILL_RATIO = 0.8;
+  private static final double TIMELINE_FILL_RATIO = 0.9;
 
   private static final Stroke POPULATION_STROKE =
       new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -34,41 +28,42 @@ final class HistogramView extends JPanel {
   private static final Comparator<Population> ALPHABETICAL_BY_NAME =
       Comparator.comparing(Population::name);
 
-  private long xOffset;
-
   private final PopulationTimeline timeline;
 
-  private HistogramView(PopulationTimeline timeline) {
+  private HistogramView(PopulationTimeline timeline, int width, int height) {
+    super(width, height, BACKGROUND_COLOR);
     this.timeline = timeline;
   }
 
   @Override
-  public void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    Graphics2D g2 = (Graphics2D) g;
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+  public void paint(Graphics2D g2) {
     PopulationSnapshot oldestSnapshot = timeline.oldest();
 
     long elapsedTimeMillis = System.currentTimeMillis() - oldestSnapshot.creationTimeMillis();
-    long xAbsolute = getWidth() * elapsedTimeMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
-    xOffset = Math.min(0L, (long) (TIMELINE_FILL_RATIO * getWidth() - xAbsolute));
+    long xAbsolute = width() * elapsedTimeMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
+    long xOffset = Math.min(0L, (long) (TIMELINE_FILL_RATIO * width() - xAbsolute));
+
+    // All points drawn hereafter will be shifted by xOffset pixels. This is how we achieve the
+    // appearance of the timeline moving to the left after reaching a certain point.
+    g2.translate(xOffset, 0);
 
     // By using the oldest populations we ensure that we include microbot types that have been
     // completely eliminated in the newer snapshots. These populations will slowly fall off the
     // histogram when enough time has passed.
     ImmutableList<Population> oldestPopulations =
+        // Sorting alphabetically ensures a stable draw order with respect to the z-axis.
         ImmutableList.sortedCopyOf(ALPHABETICAL_BY_NAME, oldestSnapshot.populations());
     oldestPopulations.forEach(
         population ->
-            drawPopulationHistory(
+            drawPopulationTimeline(
                 population,
                 oldestSnapshot.globalPopulation(),
                 oldestSnapshot.creationTimeMillis(),
                 g2));
   }
 
-  private void drawPopulationHistory(
+  /** Draws a population timeline for a single population. */
+  private void drawPopulationTimeline(
       Population population, int globalPopulation, long startTimeMillis, Graphics2D g2) {
     ImmutableList<PopulationSnapshot> snapshots = timeline.snapshots();
     ArrayList<Integer> xPoints = new ArrayList<>(snapshots.size());
@@ -100,22 +95,18 @@ final class HistogramView extends JPanel {
       return;
     }
 
-    xPoints.add(computeXCoordinate(snapshot, startTimeMillis, xOffset, getWidth()));
-    yPoints.add(
-        computeYCoordinate(populationsByName.get(populationName), globalPopulation, getHeight()));
+    xPoints.add(computeXCoordinate(snapshot, startTimeMillis));
+    yPoints.add(computeYCoordinate(populationsByName.get(populationName), globalPopulation));
   }
 
-  private static int computeXCoordinate(
-      PopulationSnapshot snapshot, long startTimeMillis, long xOffsetMillis, int componentWidth) {
+  private int computeXCoordinate(PopulationSnapshot snapshot, long startTimeMillis) {
     long distanceFromStartInMillis = snapshot.creationTimeMillis() - startTimeMillis;
-    long absoluteX = componentWidth * distanceFromStartInMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
-    return (int) (absoluteX + xOffsetMillis);
+    return (int) (width() * distanceFromStartInMillis / TIMELINE_RETENTION_PERIOD_MILLIS);
   }
 
-  private static int computeYCoordinate(
-      Population population, int globalPopulation, int componentHeight) {
-    int absoluteY = componentHeight - (componentHeight * population.size() / globalPopulation);
-    return clamp(absoluteY, 5, componentHeight - 5);
+  private int computeYCoordinate(Population population, int globalPopulation) {
+    int absoluteY = height() - (height() * population.size() / globalPopulation);
+    return clamp(absoluteY, Y_THRESHOLD_PX, height() - Y_THRESHOLD_PX);
   }
 
   /** Clamps the specified value within the interval from min to max. */
@@ -129,21 +120,15 @@ final class HistogramView extends JPanel {
   }
 
   /** Returns a new view for the given {@link Arena}. */
-  static HistogramView of(Arena arena) {
+  static HistogramView createFor(Arena arena) {
     checkNotNull(arena);
-
-    int width = INFO_CONTAINER_WIDTH_PX;
+    int width = SIDE_VIEW_WIDTH_PX;
     int height = MICROBOT_OUTER_SIZE_PX * arena.rows() / 4;
-
-    HistogramView histogramView =
-        new HistogramView(
-            PopulationTimeline.snapshot(arena)
-                .every(TIMELINE_UPDATE_FREQUENCY_MILLIS)
-                .retainFor(TIMELINE_RETENTION_PERIOD_MILLIS));
-    histogramView.setPreferredSize(new Dimension(width, height));
-    histogramView.setBackground(BACKGROUND_COLOR);
-    histogramView.setBorder(BorderFactory.createRaisedBevelBorder());
-
-    return histogramView;
+    return new HistogramView(
+        PopulationTimeline.snapshot(arena)
+            .onEveryQuery()
+            .retainFor(TIMELINE_RETENTION_PERIOD_MILLIS),
+        width,
+        height);
   }
 }
