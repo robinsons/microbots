@@ -1,8 +1,11 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static microbots.core.GraphicsUtil.drawAndPreserveTransform;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.UIConstants.MICROBOT_HALF_INNER_SIZE_DOUBLE_PX;
 import static microbots.core.UIConstants.MICROBOT_INNER_SIZE_PX;
+import static microbots.core.UIConstants.MICROBOT_NORTH_FACING_VECTOR_SHAPE;
 import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_PADDING_PX;
 
@@ -27,8 +30,22 @@ final class ArenaView extends View {
   private static void drawMicrobot(Microbot microbot, Graphics2D g2) {
     int x = MICROBOT_PADDING_PX + MICROBOT_OUTER_SIZE_PX * microbot.column();
     int y = MICROBOT_PADDING_PX + MICROBOT_OUTER_SIZE_PX * microbot.row();
-    g2.setColor(microbot.color());
-    g2.fillRect(x, y, MICROBOT_INNER_SIZE_PX, MICROBOT_INNER_SIZE_PX);
+    drawAndPreserveTransform(
+        g2,
+        g2d -> {
+          // Draw a square as the outer body.
+          g2d.translate(x, y);
+          g2d.setColor(microbot.color());
+          g2d.fillRect(0, 0, MICROBOT_INNER_SIZE_PX, MICROBOT_INNER_SIZE_PX);
+
+          // Draw the vector shape inside the body to indicate facing direction.
+          g2d.rotate(
+              microbot.facing().compassAngleRadians(),
+              MICROBOT_HALF_INNER_SIZE_DOUBLE_PX,
+              MICROBOT_HALF_INNER_SIZE_DOUBLE_PX);
+          g2d.setColor(BACKGROUND_COLOR);
+          g2d.fill(MICROBOT_NORTH_FACING_VECTOR_SHAPE);
+        });
   }
 
   /** Returns a new view of the given {@link Arena}. */

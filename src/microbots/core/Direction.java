@@ -7,17 +7,19 @@ package microbots.core;
  * <p><b>IMPORTANT: do not change the order of elements.</b>
  */
 enum Direction {
-  NORTH(-1, 0),
-  EAST(0, 1),
-  SOUTH(1, 0),
-  WEST(0, -1);
+  NORTH(-1, 0, 0),
+  EAST(0, 1, 90),
+  SOUTH(1, 0, 180),
+  WEST(0, -1, 270);
 
   private final int rowOffset;
   private final int columnOffset;
+  private final int compassAngleDegrees;
 
-  Direction(int rowOffset, int columnOffset) {
+  Direction(int rowOffset, int columnOffset, int compassAngleDegrees) {
     this.rowOffset = rowOffset;
     this.columnOffset = columnOffset;
+    this.compassAngleDegrees = compassAngleDegrees;
   }
 
   /**
@@ -37,6 +39,16 @@ enum Direction {
   /** @see #rowOffset() */
   int columnOffset() {
     return columnOffset;
+  }
+
+  /** Returns the angle in degrees that this direction would be on a compass, relative to north. */
+  int compassAngleDegrees() {
+    return compassAngleDegrees;
+  }
+
+  /** Returns the angle in radians that this direction would be on a compass, relative to north. */
+  double compassAngleRadians() {
+    return Math.toRadians(compassAngleDegrees);
   }
 
   /** Returns the direction that is 90 degrees clockwise relative to {@code this}. */
