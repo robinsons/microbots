@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
+import microbots.State;
 import microbots.Surroundings;
 
 /**
@@ -50,7 +51,7 @@ public final class Simulation {
    * Specifies how long the simulation will sleep for between rounds. All microbots participating in
    * the simulation will perform one action per round.
    */
-  private static final long ROUND_DELAY_MILLIS = 125L;
+  private static final long ROUND_DELAY_MILLIS = 100L;
 
   private static final long SIMULATION_NOT_YET_STARTED_MILLIS = -1;
 
@@ -109,7 +110,8 @@ public final class Simulation {
   /** Performs a single action for the specified microbot. */
   private void processAction(Microbot microbot) {
     Surroundings surroundings = arena.getMicrobotSurroundings(microbot);
-    Action action = microbot.getAction(surroundings);
+    State state = new State(microbot.facing().simpleDirection(), surroundings);
+    Action action = microbot.getAction(state);
     ActionDelegate delegate =
         ACTION_DELEGATES.getOrDefault(action, Simulation::handleUnknownAction);
 

@@ -4,6 +4,7 @@ import java.awt.Color;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
+import microbots.State;
 import microbots.Surroundings;
 
 /** Example MPU implementation. The HiveBot tends to form clusters. */
@@ -17,7 +18,9 @@ public final class HiveBot extends MicrobotProcessingUnit {
   }
 
   @Override
-  public Action getAction(Surroundings surroundings) {
+  public Action getAction(State state) {
+    Surroundings surroundings = state.surroundings();
+
     // Always hack if it is possible.
     if (surroundings.front() == Obstacle.ENEMY) {
       return Action.HACK;

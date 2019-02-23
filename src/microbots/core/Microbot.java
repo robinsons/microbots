@@ -8,7 +8,7 @@ import java.lang.reflect.Constructor;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
-import microbots.Surroundings;
+import microbots.State;
 
 /** Wraps a {@link MicrobotProcessingUnit} along with additional data for the simulation. */
 final class Microbot {
@@ -37,10 +37,10 @@ final class Microbot {
     return firstNonNull(mpu.color(), Color.WHITE);
   }
 
-  /** @see MicrobotProcessingUnit#getAction(Surroundings) */
-  Action getAction(Surroundings surroundings) {
-    checkNotNull(surroundings);
-    return firstNonNull(mpu.getAction(surroundings), Action.WAIT);
+  /** @see MicrobotProcessingUnit#getAction(State) */
+  Action getAction(State state) {
+    checkNotNull(state);
+    return firstNonNull(mpu.getAction(state), Action.WAIT);
   }
 
   /** Returns the row this microbot is located at in the arena. */

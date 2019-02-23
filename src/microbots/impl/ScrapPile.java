@@ -3,7 +3,7 @@ package microbots.impl;
 import java.awt.Color;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
-import microbots.Surroundings;
+import microbots.State;
 
 /** Example MPU implementation. The ScrapPile does nothing... */
 public final class ScrapPile extends MicrobotProcessingUnit {
@@ -16,7 +16,7 @@ public final class ScrapPile extends MicrobotProcessingUnit {
   }
 
   @Override
-  public Action getAction(Surroundings surroundings) {
+  public Action getAction(State state) {
     return Action.WAIT;
   }
 }

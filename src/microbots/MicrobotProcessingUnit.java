@@ -25,8 +25,8 @@ public abstract class MicrobotProcessingUnit {
   public abstract Color color();
 
   /**
-   * Given a microbot's {@link Surroundings}, returns the {@link Action} this microbot will attempt
-   * to take. A return value of null is interpreted as {@link Action#WAIT}.
+   * Given a microbot's {@link State}, returns the {@link Action} this microbot will attempt to
+   * take. A return value of null is interpreted as {@link Action#WAIT}.
    */
-  public abstract Action getAction(Surroundings surroundings);
+  public abstract Action getAction(State state);
 }

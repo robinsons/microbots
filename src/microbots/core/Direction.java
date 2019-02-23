@@ -12,6 +12,15 @@ enum Direction {
   SOUTH(1, 0, 180),
   WEST(0, -1, 270);
 
+  static {
+    for (Direction direction : values()) {
+      if (direction.simpleDirection().ordinal() != direction.ordinal()) {
+        throw new RuntimeException(
+            "enum microbots.Direction must have the same ordering as Direction.");
+      }
+    }
+  }
+
   private final int rowOffset;
   private final int columnOffset;
   private final int compassAngleDegrees;
@@ -64,6 +73,11 @@ enum Direction {
   /** Returns the direction that is 270 degrees clockwise relative to {@code this}. */
   Direction clockwise270() {
     return values()[(ordinal() + 3) % 4];
+  }
+
+  /** Returns the {@link microbots.Direction simple direction} equivalent of {@code this}. */
+  microbots.Direction simpleDirection() {
+    return microbots.Direction.valueOf(name());
   }
 
   /** Returns a random direction (selected uniformly). */
