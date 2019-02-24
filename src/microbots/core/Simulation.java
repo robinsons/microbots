@@ -2,7 +2,6 @@ package microbots.core;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -53,27 +52,14 @@ public final class Simulation {
    */
   private static final long ROUND_DELAY_MILLIS = 100L;
 
-  private static final long SIMULATION_NOT_YET_STARTED_MILLIS = -1;
-
-  private long simulationStartTimeInMillis;
-
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
-  private final VictoryCondition victoryCondition;
   private final Window window;
 
-  private Simulation(
-      ImmutableList<Microbot> microbots,
-      Arena arena,
-      VictoryCondition victoryCondition,
-      Window window) {
+  private Simulation(ImmutableList<Microbot> microbots, Arena arena, Window window) {
     this.microbots = microbots;
     this.arena = arena;
-    this.victoryCondition = victoryCondition;
     this.window = window;
-
-    // Will be initialized when the simulation is started.
-    this.simulationStartTimeInMillis = SIMULATION_NOT_YET_STARTED_MILLIS;
   }
 
   /** Returns the list of {@link Microbot Microbots} participating in this {@link Simulation}. */
@@ -81,26 +67,12 @@ public final class Simulation {
     return microbots;
   }
 
-  /**
-   * Returns the elapsed time in milliseconds since the simulation was started. Returns zero if
-   * {@link #run()} has not been invoked.
-   */
-  long elapsedTimeInMillis() {
-    return simulationStartTimeInMillis == SIMULATION_NOT_YET_STARTED_MILLIS
-        ? 0L
-        : System.currentTimeMillis() - simulationStartTimeInMillis;
-  }
-
   /** Runs the simulation! */
-  public synchronized void run() throws Exception {
-    checkState(
-        simulationStartTimeInMillis == SIMULATION_NOT_YET_STARTED_MILLIS,
-        "Simulation#run may only be invoked once per instance.");
-
-    simulationStartTimeInMillis = System.currentTimeMillis();
+  @SuppressWarnings("InfiniteLoopStatement")
+  public void run() throws Exception {
     window.setVisible(true);
 
-    while (!victoryCondition.isSatisfied(this)) {
+    while (true) {
       microbots.forEach(this::processAction);
       window.repaint();
       Thread.sleep(ROUND_DELAY_MILLIS);
@@ -158,7 +130,6 @@ public final class Simulation {
   public static final class Builder {
 
     private int populationSize = 250;
-    private VictoryCondition victoryCondition = VictoryCondition.hamilton();
     private final HashSet<Class<? extends MicrobotProcessingUnit>> mpuTypes = new HashSet<>();
 
     /**
@@ -168,13 +139,6 @@ public final class Simulation {
     public Builder setPopulationSize(int populationSize) {
       checkArgument(populationSize > 0, "populationSize must be positive.");
       this.populationSize = populationSize;
-      return this;
-    }
-
-    /** Sets the {@link VictoryCondition} of the simulation under construction. */
-    public Builder setVictoryCondition(VictoryCondition victoryCondition) {
-      checkNotNull(victoryCondition);
-      this.victoryCondition = victoryCondition;
       return this;
     }
 
@@ -194,7 +158,7 @@ public final class Simulation {
       Arena arena = Arena.builder().withMicrobots(microbots).build();
       Window window = Window.createFor(arena);
 
-      return new Simulation(microbots, arena, victoryCondition, window);
+      return new Simulation(microbots, arena, window);
     }
   }
 }
