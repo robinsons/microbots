@@ -48,8 +48,6 @@ final class Window extends JFrame {
    * visible.
    */
   private void reset() {
-    setVisible(false);
-
     if (windowPanel != null) {
       remove(windowPanel);
     }
@@ -69,7 +67,7 @@ final class Window extends JFrame {
     window.setTitle(WINDOW_TITLE);
     window.setResizable(false);
     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    window.setJMenuBar(WindowMenuBar.create());
+    window.setJMenuBar(WindowMenuBar.create(window));
     return window;
   }
 }
