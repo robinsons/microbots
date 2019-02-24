@@ -189,7 +189,7 @@ final class WindowMenuBar extends JMenuBar {
   private static ImmutableList<Class<? extends MicrobotProcessingUnit>> fetchMicrobotTypes() {
     try {
       String packageName = Reflection.getPackageName(MicrobotProcessingUnit.class);
-      ClassPath classPath = ClassPath.from(ClassLoader.getSystemClassLoader());
+      ClassPath classPath = ClassPath.from(MicrobotProcessingUnit.class.getClassLoader());
       return classPath
           .getTopLevelClassesRecursive(packageName)
           .stream()
