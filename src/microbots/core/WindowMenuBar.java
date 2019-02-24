@@ -9,6 +9,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
+import microbots.impl.HiveBot;
+import microbots.impl.JunkyardBot;
 import microbots.impl.ScrapPile;
 
 /**
@@ -18,8 +20,13 @@ import microbots.impl.ScrapPile;
 final class WindowMenuBar extends JMenuBar {
 
   private static final SimulationRate INITIAL_SIMULATION_RATE = SimulationRate.NORMAL;
+  private static final int INITIAL_POPULATION_SIZE = 300;
+  private static final int MINIMUM_POPULATION_SIZE = 100;
+  private static final int MAXIMUM_POPULATION_SIZE = 1000;
+  private static final int POPULATION_SIZE_STEP = 100;
 
   private SimulationRate simulationRate = INITIAL_SIMULATION_RATE;
+  private int populationSize = INITIAL_POPULATION_SIZE;
 
   private final Window window;
 
@@ -41,6 +48,7 @@ final class WindowMenuBar extends JMenuBar {
     menu.setMnemonic(KeyEvent.VK_S);
 
     menu.add(createRunItem());
+    menu.add(createPopulationSizeSubMenu());
     menu.addSeparator();
 
     menu.add(createExitItem());
@@ -51,24 +59,49 @@ final class WindowMenuBar extends JMenuBar {
 
   /** Creates the menu item that runs a new simulation when selected. */
   private JMenuItem createRunItem() {
-    JMenuItem runItem = new JMenuItem("Run", KeyEvent.VK_R);
-    runItem.setAccelerator(getKeyStroke(KeyEvent.VK_F5, 0));
-    runItem.addActionListener(
+    JMenuItem item = new JMenuItem("Run", KeyEvent.VK_R);
+    item.setAccelerator(getKeyStroke(KeyEvent.VK_F5, 0));
+    item.addActionListener(
         event -> {
           try {
-            window.setSimulation(Simulation.builder().addMpuType(ScrapPile.class).build());
+            window.setSimulation(
+                Simulation.builder()
+                    .setPopulationSize(populationSize)
+                    .addMpuType(ScrapPile.class)
+                    .addMpuType(JunkyardBot.class)
+                    .addMpuType(HiveBot.class)
+                    .build());
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
         });
-    return runItem;
+    return item;
+  }
+
+  /** Creates the sub menu that allows for specifying the population size of new simulations. */
+  private JMenu createPopulationSizeSubMenu() {
+    JMenu menu = new JMenu("Population Size");
+    menu.setMnemonic(KeyEvent.VK_P);
+
+    ButtonGroup group = new ButtonGroup();
+    for (int i = MINIMUM_POPULATION_SIZE; i <= MAXIMUM_POPULATION_SIZE; i += POPULATION_SIZE_STEP) {
+      int populationSize = i;
+      JRadioButtonMenuItem item = new JRadioButtonMenuItem(String.format("%d", populationSize));
+      item.setSelected(populationSize == this.populationSize);
+      item.addActionListener(event -> this.populationSize = populationSize);
+
+      group.add(item);
+      menu.add(item);
+    }
+
+    return menu;
   }
 
   /** Creates the menu item that exits the game when selected. */
   private JMenuItem createExitItem() {
-    JMenuItem exitItem = new JMenuItem("Exit", KeyEvent.VK_X);
-    exitItem.addActionListener(event -> System.exit(0));
-    return exitItem;
+    JMenuItem item = new JMenuItem("Exit", KeyEvent.VK_X);
+    item.addActionListener(event -> System.exit(0));
+    return item;
   }
 
   /** Adds a menu to this menu bar that allows the user to change the simulation rate. */
