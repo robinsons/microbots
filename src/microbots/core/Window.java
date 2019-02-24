@@ -10,10 +10,11 @@ import javax.swing.JFrame;
 final class Window extends JFrame {
 
   private static final String WINDOW_TITLE = "Microbot Battle Arena";
-  private static final long ROUND_DELAY_MILLIS = 100L;
 
   private Simulation simulation;
   private Component windowPanel;
+
+  private Window() {}
 
   /** Begins a loop to run the simulation and redraw this window. */
   @SuppressWarnings("InfiniteLoopStatement")
@@ -22,7 +23,7 @@ final class Window extends JFrame {
       if (simulation != null) {
         simulation.doRound();
         repaint();
-        sleep(ROUND_DELAY_MILLIS);
+        sleep(menuBar().selectedSimulationRate().millisPerRound());
       }
     }
   }
@@ -57,12 +58,18 @@ final class Window extends JFrame {
     windowPanel = null;
   }
 
+  /** Returns this window's {@link WindowMenuBar}. */
+  private WindowMenuBar menuBar() {
+    return (WindowMenuBar) getJMenuBar();
+  }
+
   /** Returns a new {@link Window}. */
   static Window create() {
     Window window = new Window();
     window.setTitle(WINDOW_TITLE);
     window.setResizable(false);
     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    window.setJMenuBar(WindowMenuBar.create());
     return window;
   }
 }
