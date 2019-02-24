@@ -22,7 +22,10 @@ enum ArenaMap {
   ENCLOSED(75, 100, "Enclosed", "enclosed.txt"),
 
   /** The diamond map has a diamond-shaped obstruction in the center of the map. */
-  DIAMOND(75, 100, "Diamond", "diamond.txt");
+  DIAMOND(75, 100, "Diamond", "diamond.txt"),
+
+  /** The quadrant map is divided into four regions with a connecting area in the middle. */
+  QUADRANTS(75, 100, "Quadrants", "quadrants.txt");
 
   private final int rows;
   private final int columns;
