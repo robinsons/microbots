@@ -3,6 +3,7 @@ package microbots.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.util.HashSet;
@@ -148,6 +149,16 @@ public final class Simulation {
     }
 
     /**
+     * Adds each {@link MicrobotProcessingUnit MPU type} from the given collection to the simulation
+     * being built.
+     */
+    Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
+      checkNotNull(mpuTypes);
+      mpuTypes.forEach(this::addMpuType);
+      return this;
+    }
+
+    /**
      * Builds a simulation based on the parameters of this builder, and then starts it in a new
      * window.
      */
@@ -159,9 +170,6 @@ public final class Simulation {
 
     /** Builds a simulation based on the parameters of this builder, but does not start it. */
     Simulation build() throws Exception {
-      checkArgument(
-          !mpuTypes.isEmpty(), "Must specify at least one MPU type to create a simulation.");
-
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
       return new Simulation(microbots, arena);

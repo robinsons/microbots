@@ -1,17 +1,28 @@
 package microbots.core;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static javax.swing.KeyStroke.getKeyStroke;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
+import com.google.common.reflect.Reflection;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
-import microbots.impl.HiveBot;
-import microbots.impl.JunkyardBot;
-import microbots.impl.ScrapPile;
+import microbots.MicrobotProcessingUnit;
 
 /**
  * The menu bar offers options for controlling the running simulation. For example, one can change
@@ -29,9 +40,12 @@ final class WindowMenuBar extends JMenuBar {
   private int populationSize = INITIAL_POPULATION_SIZE;
 
   private final Window window;
+  private final List<Class<? extends MicrobotProcessingUnit>> microbotTypes;
 
-  private WindowMenuBar(Window window) {
+  private WindowMenuBar(
+      Window window, List<Class<? extends MicrobotProcessingUnit>> microbotTypes) {
     this.window = window;
+    this.microbotTypes = microbotTypes;
   }
 
   /** Returns the currently selected {@link SimulationRate}. */
@@ -49,8 +63,8 @@ final class WindowMenuBar extends JMenuBar {
 
     menu.add(createRunItem());
     menu.add(createPopulationSizeSubMenu());
+    menu.add(createMicrobotSelectionSubMenu());
     menu.addSeparator();
-
     menu.add(createExitItem());
 
     add(menu);
@@ -67,9 +81,7 @@ final class WindowMenuBar extends JMenuBar {
             window.setSimulation(
                 Simulation.builder()
                     .setPopulationSize(populationSize)
-                    .addMpuType(ScrapPile.class)
-                    .addMpuType(JunkyardBot.class)
-                    .addMpuType(HiveBot.class)
+                    .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
                     .build());
           } catch (Exception e) {
             throw new RuntimeException(e);
@@ -95,6 +107,82 @@ final class WindowMenuBar extends JMenuBar {
     }
 
     return menu;
+  }
+
+  /**
+   * Creates the sub menu that allows for toggling individual microbot types to participate in the
+   * simulation.
+   */
+  private JMenu createMicrobotSelectionSubMenu() {
+    JMenu menu = new JMenu("Microbots");
+    menu.setMnemonic(KeyEvent.VK_M);
+
+    addMicrobotTypeSection(menu);
+    menu.addSeparator();
+    addSelectAllAndDeselectAllSection(menu);
+
+    return menu;
+  }
+
+  /**
+   * Adds menu items to allow for selecting or deselecting all other menu items in the given menu.
+   */
+  private void addSelectAllAndDeselectAllSection(JMenu menu) {
+    JMenuItem selectAll = new JMenuItem("Select All", KeyEvent.VK_A);
+    JMenuItem deselectAll = new JMenuItem("Deselect All", KeyEvent.VK_D);
+    ActionListener selectionActionListener =
+        event -> {
+          for (int i = 0; i < menu.getItemCount(); i++) {
+            JMenuItem item = menu.getItem(i);
+            if (item != null && item != selectAll && item != deselectAll) {
+              item.setSelected(selectAll.equals(event.getSource()));
+            }
+          }
+        };
+
+    selectAll.addActionListener(selectionActionListener);
+    deselectAll.addActionListener(selectionActionListener);
+
+    menu.add(selectAll);
+    menu.add(deselectAll);
+  }
+
+  /** Adds menu items that allow the user to toggle individual microbot types. */
+  private void addMicrobotTypeSection(JMenu menu) {
+    ImmutableList<Class<? extends MicrobotProcessingUnit>> microbotTypes = fetchMicrobotTypes();
+    for (Class<? extends MicrobotProcessingUnit> microbotType : microbotTypes) {
+      JCheckBoxMenuItem item = new JCheckBoxMenuItem(microbotType.getSimpleName());
+      item.setSelected(WindowMenuBar.this.microbotTypes.contains(microbotType));
+      item.addItemListener(
+          event -> {
+            if (((JCheckBoxMenuItem) event.getItem()).isSelected()) {
+              WindowMenuBar.this.microbotTypes.add(microbotType);
+            } else {
+              WindowMenuBar.this.microbotTypes.remove(microbotType);
+            }
+          });
+      menu.add(item);
+    }
+  }
+
+  @SuppressWarnings("unchecked") // Cast is safe because we check isAssignableFrom first.
+  private static ImmutableList<Class<? extends MicrobotProcessingUnit>> fetchMicrobotTypes() {
+    try {
+      String packageName = Reflection.getPackageName(MicrobotProcessingUnit.class);
+      ClassPath classPath = ClassPath.from(ClassLoader.getSystemClassLoader());
+      return classPath
+          .getTopLevelClassesRecursive(packageName)
+          .stream()
+          .map(ClassInfo::load)
+          .filter(Objects::nonNull)
+          .filter(MicrobotProcessingUnit.class::isAssignableFrom)
+          .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
+          .map(clazz -> (Class<? extends MicrobotProcessingUnit>) clazz)
+          .sorted(Comparator.comparing(Class::getSimpleName))
+          .collect(toImmutableList());
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to load microbot types.", e);
+    }
   }
 
   /** Creates the menu item that exits the game when selected. */
@@ -126,6 +214,8 @@ final class WindowMenuBar extends JMenuBar {
 
   /** Creates a new {@link WindowMenuBar}. */
   static WindowMenuBar create(Window window) {
-    return new WindowMenuBar(window).addSimulationSettingsMenu().addSimulationRateMenu();
+    return new WindowMenuBar(window, new ArrayList<>())
+        .addSimulationSettingsMenu()
+        .addSimulationRateMenu();
   }
 }
