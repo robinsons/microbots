@@ -30,14 +30,13 @@ import microbots.MicrobotProcessingUnit;
  */
 final class WindowMenuBar extends JMenuBar {
 
-  private static final SimulationRate INITIAL_SIMULATION_RATE = SimulationRate.NORMAL;
-  private static final int INITIAL_POPULATION_SIZE = 300;
   private static final int MINIMUM_POPULATION_SIZE = 100;
   private static final int MAXIMUM_POPULATION_SIZE = 1000;
   private static final int POPULATION_SIZE_STEP = 100;
 
-  private SimulationRate simulationRate = INITIAL_SIMULATION_RATE;
-  private int populationSize = INITIAL_POPULATION_SIZE;
+  private SimulationRate simulationRate = SimulationDefaults.SIMULATION_RATE;
+  private int populationSize = SimulationDefaults.POPULATION_SIZE;
+  private ArenaMap arenaMap = SimulationDefaults.ARENA_MAP;
 
   private final Window window;
   private final List<Class<? extends MicrobotProcessingUnit>> microbotTypes;
@@ -63,6 +62,7 @@ final class WindowMenuBar extends JMenuBar {
 
     menu.add(createRunItem());
     menu.add(createPopulationSizeSubMenu());
+    menu.add(createArenaMapSubMenu());
     menu.add(createMicrobotSelectionSubMenu());
     menu.addSeparator();
     menu.add(createExitItem());
@@ -81,6 +81,7 @@ final class WindowMenuBar extends JMenuBar {
             window.setSimulation(
                 Simulation.builder()
                     .setPopulationSize(populationSize)
+                    .setArenaMap(arenaMap)
                     .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
                     .build());
           } catch (Exception e) {
@@ -109,13 +110,31 @@ final class WindowMenuBar extends JMenuBar {
     return menu;
   }
 
+  /** Creates the sub menu that allows for specifying the desired map of new simulations. */
+  private JMenu createArenaMapSubMenu() {
+    JMenu menu = new JMenu("Map");
+    menu.setMnemonic(KeyEvent.VK_M);
+
+    ButtonGroup group = new ButtonGroup();
+    for (ArenaMap map : ArenaMap.values()) {
+      JRadioButtonMenuItem item = new JRadioButtonMenuItem(map.description());
+      item.setSelected(map.ordinal() == arenaMap.ordinal());
+      item.addActionListener(event -> arenaMap = map);
+
+      group.add(item);
+      menu.add(item);
+    }
+
+    return menu;
+  }
+
   /**
    * Creates the sub menu that allows for toggling individual microbot types to participate in the
    * simulation.
    */
   private JMenu createMicrobotSelectionSubMenu() {
     JMenu menu = new JMenu("Microbots");
-    menu.setMnemonic(KeyEvent.VK_M);
+    menu.setMnemonic(KeyEvent.VK_B);
 
     addMicrobotTypeSection(menu);
     menu.addSeparator();
@@ -150,6 +169,7 @@ final class WindowMenuBar extends JMenuBar {
   /** Adds menu items that allow the user to toggle individual microbot types. */
   private void addMicrobotTypeSection(JMenu menu) {
     ImmutableList<Class<? extends MicrobotProcessingUnit>> microbotTypes = fetchMicrobotTypes();
+    WindowMenuBar.this.microbotTypes.addAll(microbotTypes);
     for (Class<? extends MicrobotProcessingUnit> microbotType : microbotTypes) {
       JCheckBoxMenuItem item = new JCheckBoxMenuItem(microbotType.getSimpleName());
       item.setSelected(WindowMenuBar.this.microbotTypes.contains(microbotType));

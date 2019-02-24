@@ -15,8 +15,6 @@ import microbots.Surroundings;
 /** The arena is where microbots do battle. */
 final class Arena {
 
-  private static final ArenaMap DEFAULT_MAP = ArenaMap.ENCLOSED;
-
   private final Table<Integer, Integer, Microbot> microbots;
   private final ImmutableTable<Integer, Integer, Terrain> terrain;
   private final ArenaMap arenaMap;
@@ -136,9 +134,9 @@ final class Arena {
     return (column + columns()) % columns();
   }
 
-  /** Returns a new {@link Builder} for constructing arenas. Pre-populates some default values. */
+  /** Returns a new {@link Builder} for constructing arenas. */
   static Builder builder() {
-    return new Builder().withMap(DEFAULT_MAP);
+    return new Builder();
   }
 
   /** Builder class for creating arena instances. */
@@ -148,8 +146,7 @@ final class Arena {
     private ImmutableList<Microbot> microbots = ImmutableList.of();
 
     Builder withMap(ArenaMap map) {
-      checkNotNull(map);
-      this.map = map;
+      this.map = checkNotNull(map);
       return this;
     }
 
@@ -161,6 +158,7 @@ final class Arena {
 
     /** Returns a new arena instance. */
     Arena build() {
+      checkNotNull(map);
       checkArgument(
           map.traversableSpaceCount() >= microbots.size(),
           "Arena has only %d traversable spaces, which is not enough to accommodate %d microbots.",
@@ -170,6 +168,7 @@ final class Arena {
       Table<Integer, Integer, Microbot> grid = HashBasedTable.create();
       ImmutableTable<Integer, Integer, Terrain> terrain = map.terrain();
       microbots.forEach(microbot -> placeMicrobot(microbot, grid, terrain));
+
       return new Arena(grid, terrain, map);
     }
 

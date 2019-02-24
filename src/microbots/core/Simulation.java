@@ -122,39 +122,24 @@ public final class Simulation {
 
   /** Returns a new {@link Builder} for constructing simulation instances. */
   public static Builder builder() {
-    return new Builder();
+    return new Builder()
+        .setPopulationSize(SimulationDefaults.POPULATION_SIZE)
+        .setArenaMap(SimulationDefaults.ARENA_MAP);
   }
 
   /** Builder class for constructing simulation instances. */
   public static final class Builder {
 
-    private int populationSize = 250;
+    private int populationSize;
+    private ArenaMap arenaMap;
     private final HashSet<Class<? extends MicrobotProcessingUnit>> mpuTypes = new HashSet<>();
 
-    /**
-     * Sets the population size, which is the number of microbots of each type that will be included
-     * in the simulation. Must be positive.
-     */
-    public Builder setPopulationSize(int populationSize) {
-      checkArgument(populationSize > 0, "populationSize must be positive.");
-      this.populationSize = populationSize;
-      return this;
-    }
+    // PUBLIC API
 
     /** Adds a new {@link MicrobotProcessingUnit MPU type} to be included in the simulation. */
     public Builder addMpuType(Class<? extends MicrobotProcessingUnit> mpuType) {
       checkNotNull(mpuType);
       mpuTypes.add(mpuType);
-      return this;
-    }
-
-    /**
-     * Adds each {@link MicrobotProcessingUnit MPU type} from the given collection to the simulation
-     * being built.
-     */
-    Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
-      checkNotNull(mpuTypes);
-      mpuTypes.forEach(this::addMpuType);
       return this;
     }
 
@@ -168,10 +153,39 @@ public final class Simulation {
       window.run();
     }
 
+    // PUBLIC API ENDS HERE. Below this point is the internal API.
+
+    /**
+     * Adds each {@link MicrobotProcessingUnit MPU type} from the given collection to the simulation
+     * being built.
+     */
+    Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
+      checkNotNull(mpuTypes);
+      mpuTypes.forEach(this::addMpuType);
+      return this;
+    }
+
+    /**
+     * Sets the population size, which is the number of microbots of each type that will be included
+     * in the simulation. Must be positive.
+     */
+    Builder setPopulationSize(int populationSize) {
+      checkArgument(populationSize > 0, "populationSize must be positive.");
+      this.populationSize = populationSize;
+      return this;
+    }
+
+    /** Sets the arena map to use in the simulation. */
+    Builder setArenaMap(ArenaMap arenaMap) {
+      checkNotNull(arenaMap);
+      this.arenaMap = arenaMap;
+      return this;
+    }
+
     /** Builds a simulation based on the parameters of this builder, but does not start it. */
     Simulation build() throws Exception {
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
-      Arena arena = Arena.builder().withMicrobots(microbots).build();
+      Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
       return new Simulation(microbots, arena);
     }
   }
