@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import java.util.Optional;
 import microbots.Obstacle;
@@ -14,34 +15,41 @@ import microbots.Surroundings;
 /** The arena is where microbots do battle. */
 final class Arena {
 
-  private static final int DEFAULT_ROWS = 75;
-  private static final int DEFAULT_COLUMNS = 100;
+  private static final ArenaMap DEFAULT_MAP = ArenaMap.ENCLOSED;
 
-  private final Table<Integer, Integer, Microbot> grid;
-  private final int rows;
-  private final int columns;
+  private final Table<Integer, Integer, Microbot> microbots;
+  private final ImmutableTable<Integer, Integer, Terrain> terrain;
+  private final ArenaMap arenaMap;
 
-  private Arena(Table<Integer, Integer, Microbot> grid, int rows, int columns) {
-    this.grid = grid;
-    this.rows = rows;
-    this.columns = columns;
+  private Arena(
+      Table<Integer, Integer, Microbot> microbots,
+      ImmutableTable<Integer, Integer, Terrain> terrain,
+      ArenaMap arenaMap) {
+    this.microbots = microbots;
+    this.terrain = terrain;
+    this.arenaMap = arenaMap;
   }
 
-  /** Returns the number of {@link #rows} in this arena. */
+  /** Returns the number of rows in this arena. */
   int rows() {
-    return rows;
+    return arenaMap.rows();
   }
 
-  /** Returns the number of {@link #columns} in this arena. */
+  /** Returns the number of columns in this arena. */
   int columns() {
-    return columns;
+    return arenaMap.columns();
   }
 
   /** Returns all of the microbots currently in this arena. */
   ImmutableSet<Microbot> microbots() {
-    synchronized (grid) {
-      return ImmutableSet.copyOf(grid.values());
+    synchronized (microbots) {
+      return ImmutableSet.copyOf(microbots.values());
     }
+  }
+
+  /** Returns this arena's terrain. */
+  ImmutableTable<Integer, Integer, Terrain> terrain() {
+    return terrain;
   }
 
   /**
@@ -61,12 +69,13 @@ final class Arena {
   void moveMicrobot(Microbot microbot) {
     checkNotNull(microbot);
     Direction direction = microbot.facing();
-    synchronized (grid) {
+    synchronized (microbots) {
       if (getObstacleRelativeToMicrobot(microbot, direction) == Obstacle.NONE) {
-        grid.remove(microbot.row(), microbot.column());
+        microbots.remove(microbot.row(), microbot.column());
         microbot.setPosition(
-            microbot.row() + direction.rowOffset(), microbot.column() + direction.columnOffset());
-        grid.put(microbot.row(), microbot.column(), microbot);
+            normalizeRow(microbot.row() + direction.rowOffset()),
+            normalizeColumn(microbot.column() + direction.columnOffset()));
+        microbots.put(microbot.row(), microbot.column(), microbot);
       }
     }
   }
@@ -91,7 +100,7 @@ final class Arena {
     int otherRow = microbot.row() + direction.rowOffset();
     int otherColumn = microbot.column() + direction.columnOffset();
 
-    if (!inBounds(otherRow, otherColumn)) {
+    if (!terrainAt(otherRow, otherColumn).isTraversable()) {
       return Obstacle.WALL;
     }
 
@@ -103,40 +112,44 @@ final class Arena {
    * position is unoccupied.
    */
   private Optional<Microbot> microbotAt(int row, int column) {
-    return Optional.ofNullable(grid.get(row, column));
+    return Optional.ofNullable(microbots.get(normalizeRow(row), normalizeColumn(column)));
+  }
+
+  /** Returns the terrain located at the specified position. */
+  private Terrain terrainAt(int row, int column) {
+    return terrain.get(normalizeRow(row), normalizeColumn(column));
   }
 
   /**
-   * Returns whether or not the indicated row and column positions are within the bounds of this
-   * arena.
+   * Normalizes the given row so that it is guaranteed to be in the bounds of this arena. This works
+   * as long as the given row is in the interval {@code [-rows(),Integer.MAX_VALUE]}.
    */
-  private boolean inBounds(int row, int column) {
-    return 0 <= row && row < rows && 0 <= column && column < columns;
+  private int normalizeRow(int row) {
+    return (row + rows()) % rows();
+  }
+
+  /**
+   * Normalizes the given column so that it is guaranteed to be in the bounds of this arena. This
+   * works as long as the given column is in the interval {@code [-columns(),Integer.MAX_VALUE]}.
+   */
+  private int normalizeColumn(int column) {
+    return (column + columns()) % columns();
   }
 
   /** Returns a new {@link Builder} for constructing arenas. Pre-populates some default values. */
   static Builder builder() {
-    return new Builder().withRows(DEFAULT_ROWS).withColumns(DEFAULT_COLUMNS);
+    return new Builder().withMap(DEFAULT_MAP);
   }
 
   /** Builder class for creating arena instances. */
   static final class Builder {
 
-    private int rows;
-    private int columns;
+    private ArenaMap map;
     private ImmutableList<Microbot> microbots = ImmutableList.of();
 
-    /** Sets the number of rows in the arena. Must be positive. */
-    Builder withRows(int rows) {
-      checkArgument(rows > 0, "rows must be positive.");
-      this.rows = rows;
-      return this;
-    }
-
-    /** Sets the number of columns in the arena. Must be positive. */
-    Builder withColumns(int columns) {
-      checkArgument(columns > 0, "columns must be positive.");
-      this.columns = columns;
+    Builder withMap(ArenaMap map) {
+      checkNotNull(map);
+      this.map = map;
       return this;
     }
 
@@ -149,29 +162,34 @@ final class Arena {
     /** Returns a new arena instance. */
     Arena build() {
       checkArgument(
-          rows * columns >= microbots.size(),
-          "Arena of size %d is not large enough to accommodate %d microbots.",
-          rows * columns,
+          map.traversableSpaceCount() >= microbots.size(),
+          "Arena has only %d traversable spaces, which is not enough to accommodate %d microbots.",
+          map.traversableSpaceCount(),
           microbots.size());
 
       Table<Integer, Integer, Microbot> grid = HashBasedTable.create();
-      microbots.forEach(microbot -> placeMicrobot(microbot, grid));
-      return new Arena(grid, rows, columns);
+      ImmutableTable<Integer, Integer, Terrain> terrain = map.terrain();
+      microbots.forEach(microbot -> placeMicrobot(microbot, grid, terrain));
+      return new Arena(grid, terrain, map);
     }
 
     /**
-     * Places the given microbot in a random location on the grid. The first microbot is always
-     * placed at (0, 0).
+     * Places the given microbot in a random location on the grid. All microbots are placed in a
+     * position such that the corresponding location in the terrain is {@link
+     * Terrain#isTraversable() traversable}.
      */
-    private void placeMicrobot(Microbot microbot, Table<Integer, Integer, Microbot> grid) {
+    private void placeMicrobot(
+        Microbot microbot,
+        Table<Integer, Integer, Microbot> grid,
+        Table<Integer, Integer, Terrain> terrain) {
       int row = 0;
       int column = 0;
 
       // This approach becomes inefficient as the ratio of microbots to arena cells approaches 1.
       // Consider refactoring if arenas are not sparsely populated.
-      while (grid.contains(row, column)) {
-        row = (int) (rows * Math.random());
-        column = (int) (columns * Math.random());
+      while (grid.contains(row, column) || !terrain.get(row, column).isTraversable()) {
+        row = (int) (map.rows() * Math.random());
+        column = (int) (map.columns() * Math.random());
       }
 
       microbot.setPosition(row, column);

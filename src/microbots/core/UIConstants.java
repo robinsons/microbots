@@ -16,6 +16,7 @@ final class UIConstants {
   private UIConstants() {}
 
   static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
+  static final Color WALL_COLOR = Color.GRAY;
   static final String FONT_FILENAME = "ARDESTINE.ttf";
   static final Font BASE_FONT = loadFont();
 
@@ -42,7 +43,7 @@ final class UIConstants {
 
   /** Loads the font specified by {@link #FONT_FILENAME}. */
   private static Font loadFont() {
-    Path path = Paths.get(System.getProperty("user.dir"), "res", FONT_FILENAME);
+    Path path = Paths.get(System.getProperty("user.dir"), "res", "fonts", FONT_FILENAME);
     try (InputStream inputStream = Files.newInputStream(path)) {
       return Font.createFont(Font.TRUETYPE_FONT, inputStream);
     } catch (Exception e) {
