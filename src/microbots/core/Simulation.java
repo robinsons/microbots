@@ -20,12 +20,11 @@ import microbots.Surroundings;
  *   static final class Microbot9000 extends MicrobotProcesingUnit { ... }
  *   static final class MicrobotPrime extends MicrobotProcesingUnit { ... }
  *   ...
- *   Simulation simulation = Simulation.builder()
+ *   Simulation.builder()
  *       .setPopulationSize(500)
  *       .addMpuType(Microbot9000.class)
  *       .addMpuType(MicrobotPrime.class)
- *       .build();
- *   simulation.run();
+ *       .start();
  * </pre>
  */
 public final class Simulation {
@@ -54,12 +53,10 @@ public final class Simulation {
 
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
-  private final Window window;
 
-  private Simulation(ImmutableList<Microbot> microbots, Arena arena, Window window) {
+  private Simulation(ImmutableList<Microbot> microbots, Arena arena) {
     this.microbots = microbots;
     this.arena = arena;
-    this.window = window;
   }
 
   /** Returns the list of {@link Microbot Microbots} participating in this {@link Simulation}. */
@@ -67,16 +64,17 @@ public final class Simulation {
     return microbots;
   }
 
-  /** Runs the simulation! */
-  @SuppressWarnings("InfiniteLoopStatement")
-  public void run() throws Exception {
-    window.setVisible(true);
+  /** Returns the {@link Arena} of this {@link Simulation}. */
+  Arena arena() {
+    return arena;
+  }
 
-    while (true) {
-      microbots.forEach(this::processAction);
-      window.repaint();
-      Thread.sleep(ROUND_DELAY_MILLIS);
-    }
+  /**
+   * Performs a single round of the simulation. In each round, every microbot in the simulation gets
+   * to perform one action.
+   */
+  void doRound() {
+    microbots.forEach(this::processAction);
   }
 
   /** Performs a single action for the specified microbot. */
@@ -149,16 +147,24 @@ public final class Simulation {
       return this;
     }
 
-    /** Returns a new simulation instance based on the parameters of this builder. */
-    public Simulation build() throws Exception {
+    /**
+     * Builds a simulation based on the parameters of this builder, and then starts it in a new
+     * window.
+     */
+    public void start() throws Exception {
+      Window window = Window.create();
+      window.setSimulation(build());
+      window.run();
+    }
+
+    /** Builds a simulation based on the parameters of this builder, but does not start it. */
+    Simulation build() throws Exception {
       checkArgument(
           !mpuTypes.isEmpty(), "Must specify at least one MPU type to create a simulation.");
 
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMicrobots(microbots).build();
-      Window window = Window.createFor(arena);
-
-      return new Simulation(microbots, arena, window);
+      return new Simulation(microbots, arena);
     }
   }
 }
