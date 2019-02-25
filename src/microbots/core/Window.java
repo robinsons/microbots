@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Thread.sleep;
 
 import java.awt.Component;
+import java.awt.Graphics;
 import javax.swing.JFrame;
 
 /** The window holds UI components that show the simulation as it runs. */
@@ -11,10 +12,17 @@ final class Window extends JFrame {
 
   private static final String WINDOW_TITLE = "Microbot Battle Arena";
 
+  private boolean paintComplete;
   private Simulation simulation;
   private Component windowPanel;
 
   private Window() {}
+
+  @Override
+  public void paint(Graphics g) {
+    super.paint(g);
+    paintComplete = true;
+  }
 
   /** Begins a loop to run the simulation and redraw this window. */
   @SuppressWarnings("InfiniteLoopStatement")
@@ -22,8 +30,17 @@ final class Window extends JFrame {
     while (true) {
       if (simulation != null) {
         simulation.doRound();
+
+        // The call to repaint() triggers an asynchronous redrawing of the UI. When the simulation
+        // rate is very fast, it was observed that sleep() would return and the next round would
+        // begin running BEFORE the UI was completely repainted. This caused visual anomalies,
+        // such as the population and histogram views drawing microbot info with the incorrect
+        // color. The addition of the paintComplete variable is intended to prevent such issues.
+        paintComplete = false;
         repaint();
-        sleep(menuBar().selectedSimulationRate().millisPerRound());
+        while (!paintComplete) {
+          sleep(menuBar().selectedSimulationRate().millisPerRound());
+        }
       }
     }
   }
