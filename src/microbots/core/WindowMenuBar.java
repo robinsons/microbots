@@ -118,6 +118,7 @@ final class WindowMenuBar extends JMenuBar {
     ButtonGroup group = new ButtonGroup();
     for (ArenaMap map : ArenaMap.values()) {
       JRadioButtonMenuItem item = new JRadioButtonMenuItem(map.description());
+      item.setMnemonic(map.mnemonic());
       item.setSelected(map.ordinal() == arenaMap.ordinal());
       item.addActionListener(event -> arenaMap = map);
 

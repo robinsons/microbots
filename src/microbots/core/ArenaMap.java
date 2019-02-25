@@ -3,6 +3,7 @@ package microbots.core;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableTable;
+import java.awt.event.KeyEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,32 +12,37 @@ import java.util.List;
 /** An {@link ArenaMap} is a preconfigured arrangement of {@link Terrain}. */
 enum ArenaMap {
   /**
-   * The empty map has no terrain. Microbots may be able to "wrap around" on the sides of the arena.
+   * The open map has no terrain. Microbots will be able to "wrap around" on the sides of the arena.
    */
-  EMPTY(75, 100, "Empty", null),
+  OPEN(75, 100, "Open", KeyEvent.VK_O, null),
 
   /**
-   * The enclosed map is empty everywhere except along the borders. This prevents microbots from
+   * The enclosed map is open everywhere except along the borders. This prevents microbots from
    * wrapping around.
    */
-  ENCLOSED(75, 100, "Enclosed", "enclosed.txt"),
+  ENCLOSED(75, 100, "Enclosed", KeyEvent.VK_E, "enclosed.txt"),
 
   /** The diamond map has a diamond-shaped obstruction in the center of the map. */
-  DIAMOND(75, 100, "Diamond", "diamond.txt"),
+  DIAMOND(75, 100, "Diamond", KeyEvent.VK_D, "diamond.txt"),
 
   /** The quadrant map is divided into four regions with a connecting area in the middle. */
-  QUADRANTS(75, 100, "Quadrants", "quadrants.txt");
+  QUADRANTS(75, 100, "Quadrants", KeyEvent.VK_Q, "quadrants.txt"),
+
+  /** The circle map is just a circular shaped map... Like a petri dish. */
+  CIRCLE(75, 100, "Circle", KeyEvent.VK_C, "circle.txt");
 
   private final int rows;
   private final int columns;
   private final String description;
+  private final int mnemonic;
   private final String filename;
   private final ImmutableTable<Integer, Integer, Terrain> terrain;
 
-  ArenaMap(int rows, int columns, String description, String filename) {
+  ArenaMap(int rows, int columns, String description, int mnemonic, String filename) {
     this.rows = rows;
     this.columns = columns;
     this.description = description;
+    this.mnemonic = mnemonic;
     this.filename = filename;
     this.terrain = loadTerrain();
   }
@@ -54,6 +60,13 @@ enum ArenaMap {
   /** Returns a description of this map, suitable for displaying in the UI. */
   String description() {
     return description;
+  }
+
+  /**
+   * Returns this map's mnemonic, which is the hotkey that can be used to select it from the menu.
+   */
+  int mnemonic() {
+    return mnemonic;
   }
 
   /** Returns this map's terrain. */
