@@ -1,6 +1,7 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static microbots.core.GraphicsUtil.drawAndPreserveTransform;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
 import static microbots.core.UIConstants.MICROBOT_HALF_INNER_SIZE_DOUBLE_PX;
@@ -9,11 +10,21 @@ import static microbots.core.UIConstants.MICROBOT_NORTH_FACING_VECTOR_SHAPE;
 import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 import static microbots.core.UIConstants.MICROBOT_PADDING_PX;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableTable;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /** Shows the positions of the microbots in the arena. */
 final class ArenaView extends View {
+
+  private static final ImmutableMap<Terrain, BufferedImage> TERRAIN_IMAGES = createTerrainImages();
+  private static HashMap<String, BufferedImage> MICROBOT_IMAGES = new HashMap<>();
 
   private final Arena arena;
 
@@ -32,23 +43,21 @@ final class ArenaView extends View {
 
   /** Draws a single microbot. */
   private static void drawMicrobot(Microbot microbot, Graphics2D g2) {
+    maybeCreateMicrobotImage(microbot);
+
     int x = MICROBOT_PADDING_PX + MICROBOT_OUTER_SIZE_PX * microbot.column();
     int y = MICROBOT_PADDING_PX + MICROBOT_OUTER_SIZE_PX * microbot.row();
+    BufferedImage image = MICROBOT_IMAGES.get(microbot.name());
+
     drawAndPreserveTransform(
         g2,
         g2d -> {
-          // Draw a square as the outer body.
           g2d.translate(x, y);
-          g2d.setColor(microbot.color());
-          g2d.fillRect(0, 0, MICROBOT_INNER_SIZE_PX, MICROBOT_INNER_SIZE_PX);
-
-          // Draw the vector shape inside the body to indicate facing direction.
           g2d.rotate(
               microbot.facing().compassAngleRadians(),
               MICROBOT_HALF_INNER_SIZE_DOUBLE_PX,
               MICROBOT_HALF_INNER_SIZE_DOUBLE_PX);
-          g2d.setColor(BACKGROUND_COLOR);
-          g2d.fill(MICROBOT_NORTH_FACING_VECTOR_SHAPE);
+          g2d.drawImage(image, null, 0, 0);
         });
   }
 
@@ -58,27 +67,73 @@ final class ArenaView extends View {
     terrain
         .cellSet()
         .forEach(
-            cell ->
-                cell.getValue()
-                    .color()
-                    .ifPresent(
-                        color -> {
-                          int x = MICROBOT_OUTER_SIZE_PX * cell.getColumnKey();
-                          int y = MICROBOT_OUTER_SIZE_PX * cell.getRowKey();
-                          drawAndPreserveTransform(
-                              g2,
-                              g2d -> {
-                                g2d.translate(x, y);
-                                g2d.setColor(color);
-                                g2d.fillRoundRect(
-                                    0,
-                                    0,
-                                    MICROBOT_OUTER_SIZE_PX,
-                                    MICROBOT_OUTER_SIZE_PX,
-                                    MICROBOT_INNER_SIZE_PX,
-                                    MICROBOT_INNER_SIZE_PX);
-                              });
-                        }));
+            cell -> {
+              int x = MICROBOT_OUTER_SIZE_PX * cell.getColumnKey();
+              int y = MICROBOT_OUTER_SIZE_PX * cell.getRowKey();
+              BufferedImage image = TERRAIN_IMAGES.get(cell.getValue());
+              drawAndPreserveTransform(
+                  g2,
+                  g2d -> {
+                    g2d.translate(x, y);
+                    g2d.drawImage(image, null, 0, 0);
+                  });
+            });
+  }
+
+  /**
+   * Checks if {@link #MICROBOT_IMAGES} contains an entry for the microbot type with a given name,
+   * and creates one if not. Caching microbot images and drawing those images is more efficient than
+   * direct calls to methods like {@link Graphics2D#fill(Shape)}.
+   */
+  private static void maybeCreateMicrobotImage(Microbot microbot) {
+    if (!MICROBOT_IMAGES.containsKey(microbot.name())) {
+      BufferedImage image =
+          new BufferedImage(
+              MICROBOT_INNER_SIZE_PX, MICROBOT_INNER_SIZE_PX, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D graphics = image.createGraphics();
+
+      graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      graphics.setColor(microbot.color());
+      graphics.fillRect(0, 0, MICROBOT_INNER_SIZE_PX, MICROBOT_INNER_SIZE_PX);
+      graphics.setColor(BACKGROUND_COLOR);
+      graphics.fill(MICROBOT_NORTH_FACING_VECTOR_SHAPE);
+      graphics.dispose();
+
+      MICROBOT_IMAGES.put(microbot.name(), image);
+    }
+  }
+
+  /**
+   * Creates an image for each type of {@link Terrain}. Using static images nets a performance gain
+   * over using methods like {@link Graphics2D#fill(Shape)};
+   */
+  private static ImmutableMap<Terrain, BufferedImage> createTerrainImages() {
+    return Stream.of(Terrain.values())
+        .collect(
+            toImmutableMap(
+                Function.identity(),
+                terrain -> {
+                  BufferedImage image =
+                      new BufferedImage(
+                          MICROBOT_OUTER_SIZE_PX,
+                          MICROBOT_OUTER_SIZE_PX,
+                          BufferedImage.TYPE_INT_ARGB);
+                  Graphics2D graphics = image.createGraphics();
+
+                  graphics.setRenderingHint(
+                      RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                  graphics.setColor(terrain.color().orElse(BACKGROUND_COLOR));
+                  graphics.fillRoundRect(
+                      0,
+                      0,
+                      MICROBOT_OUTER_SIZE_PX,
+                      MICROBOT_OUTER_SIZE_PX,
+                      MICROBOT_INNER_SIZE_PX,
+                      MICROBOT_INNER_SIZE_PX);
+                  graphics.dispose();
+
+                  return image;
+                }));
   }
 
   /** Returns a new view of the given {@link Arena}. */
