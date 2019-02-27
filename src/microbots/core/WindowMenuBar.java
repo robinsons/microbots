@@ -38,18 +38,10 @@ final class WindowMenuBar extends JMenuBar {
   private int populationSize = SimulationDefaults.POPULATION_SIZE;
   private ArenaMap arenaMap = SimulationDefaults.ARENA_MAP;
 
-  private final Window window;
   private final List<Class<? extends MicrobotProcessingUnit>> microbotTypes;
 
-  private WindowMenuBar(
-      Window window, List<Class<? extends MicrobotProcessingUnit>> microbotTypes) {
-    this.window = window;
+  private WindowMenuBar(List<Class<? extends MicrobotProcessingUnit>> microbotTypes) {
     this.microbotTypes = microbotTypes;
-  }
-
-  /** Returns the currently selected {@link SimulationRate}. */
-  SimulationRate selectedSimulationRate() {
-    return simulationRate;
   }
 
   /**
@@ -76,18 +68,22 @@ final class WindowMenuBar extends JMenuBar {
     JMenuItem item = new JMenuItem("Run", KeyEvent.VK_R);
     item.setAccelerator(getKeyStroke(KeyEvent.VK_F5, 0));
     item.addActionListener(
-        event -> {
-          try {
-            window.setSimulation(
-                Simulation.builder()
-                    .setPopulationSize(populationSize)
-                    .setArenaMap(arenaMap)
-                    .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
-                    .build());
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        });
+        event ->
+            new Thread(
+                    () -> {
+                      try {
+                        Simulation.builder()
+                            .setPopulationSize(populationSize)
+                            .setArenaMap(arenaMap)
+                            .setSimulationRate(simulationRate)
+                            .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
+                            .build()
+                            .run();
+                      } catch (Exception e) {
+                        throw new RuntimeException(e);
+                      }
+                    })
+                .start());
     return item;
   }
 
@@ -221,9 +217,13 @@ final class WindowMenuBar extends JMenuBar {
     ButtonGroup group = new ButtonGroup();
     for (SimulationRate rate : SimulationRate.values()) {
       JRadioButtonMenuItem item = new JRadioButtonMenuItem(rate.description());
-      item.setSelected(rate.ordinal() == simulationRate.ordinal());
+      item.setSelected(rate.ordinal() == SimulationDefaults.SIMULATION_RATE.ordinal());
       item.setAccelerator(getKeyStroke(rate.ordinal() + KeyEvent.VK_1, InputEvent.ALT_MASK));
-      item.addActionListener(event -> simulationRate = rate);
+      item.addActionListener(
+          event -> {
+            simulationRate = rate;
+            Events.SIMULATION_RATE_CHANGED.post(rate);
+          });
 
       group.add(item);
       menu.add(item);
@@ -234,9 +234,7 @@ final class WindowMenuBar extends JMenuBar {
   }
 
   /** Creates a new {@link WindowMenuBar}. */
-  static WindowMenuBar create(Window window) {
-    return new WindowMenuBar(window, new ArrayList<>())
-        .addSimulationSettingsMenu()
-        .addSimulationRateMenu();
+  static WindowMenuBar create() {
+    return new WindowMenuBar(new ArrayList<>()).addSimulationSettingsMenu().addSimulationRateMenu();
   }
 }

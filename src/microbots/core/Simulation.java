@@ -6,6 +6,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.eventbus.Subscribe;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -46,12 +47,18 @@ public final class Simulation {
           Action.ROTATE_RIGHT, Simulation::handleRotateRight,
           Action.HACK, Simulation::handleHack);
 
+  private boolean terminationRequested = false;
+  private boolean windowRepaintDoneCalled = false;
+
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
+  private SimulationRate simulationRate;
 
-  private Simulation(ImmutableList<Microbot> microbots, Arena arena) {
+  private Simulation(
+      ImmutableList<Microbot> microbots, Arena arena, SimulationRate simulationRate) {
     this.microbots = microbots;
     this.arena = arena;
+    this.simulationRate = simulationRate;
   }
 
   /** Returns the list of {@link Microbot Microbots} participating in this {@link Simulation}. */
@@ -62,6 +69,41 @@ public final class Simulation {
   /** Returns the {@link Arena} of this {@link Simulation}. */
   Arena arena() {
     return arena;
+  }
+
+  /** Callback for {@link Events#SIMULATION_BUILD_NEW_CALLED}. */
+  @Subscribe
+  public void onSimulationBuildNewCalled(Simulation simulation) {
+    terminationRequested = this != simulation;
+  }
+
+  /** Callback for {@link Events#SIMULATION_RATE_CHANGED}. */
+  @Subscribe
+  public void onSimulationRateChanged(SimulationRate simulationRate) {
+    this.simulationRate = simulationRate;
+  }
+
+  /** Callback for {@link Events#WINDOW_REPAINT_DONE}. */
+  @Subscribe
+  public void onWindowRepaintDone(String ignored) {
+    windowRepaintDoneCalled = true;
+  }
+
+  /** Runs the simulation! */
+  void run() throws Exception {
+    while (!terminationRequested) {
+      doRound();
+
+      windowRepaintDoneCalled = false;
+      Events.SIMULATION_ROUND_DONE.post("foo");
+      do {
+        Thread.sleep(simulationRate.millisPerRound());
+      } while (!windowRepaintDoneCalled);
+    }
+
+    Events.WINDOW_REPAINT_DONE.unregister(this);
+    Events.SIMULATION_BUILD_NEW_CALLED.unregister(this);
+    Events.SIMULATION_RATE_CHANGED.unregister(this);
   }
 
   /**
@@ -118,7 +160,8 @@ public final class Simulation {
   public static Builder builder() {
     return new Builder()
         .setPopulationSize(SimulationDefaults.POPULATION_SIZE)
-        .setArenaMap(SimulationDefaults.ARENA_MAP);
+        .setArenaMap(SimulationDefaults.ARENA_MAP)
+        .setSimulationRate(SimulationDefaults.SIMULATION_RATE);
   }
 
   /** Builder class for constructing simulation instances. */
@@ -126,6 +169,7 @@ public final class Simulation {
 
     private int populationSize;
     private ArenaMap arenaMap;
+    private SimulationRate simulationRate;
     private final HashSet<Class<? extends MicrobotProcessingUnit>> mpuTypes = new HashSet<>();
 
     // PUBLIC API
@@ -142,9 +186,8 @@ public final class Simulation {
      * window.
      */
     public void start() throws Exception {
-      Window window = Window.create();
-      window.setSimulation(build());
-      window.run();
+      Window.create();
+      build().run();
     }
 
     // PUBLIC API ENDS HERE. Below this point is the internal API.
@@ -171,8 +214,13 @@ public final class Simulation {
 
     /** Sets the arena map to use in the simulation. */
     Builder setArenaMap(ArenaMap arenaMap) {
-      checkNotNull(arenaMap);
-      this.arenaMap = arenaMap;
+      this.arenaMap = checkNotNull(arenaMap);
+      return this;
+    }
+
+    /** Sets the simulation rate to use in the new simulation. */
+    Builder setSimulationRate(SimulationRate simulationRate) {
+      this.simulationRate = checkNotNull(simulationRate);
       return this;
     }
 
@@ -180,7 +228,17 @@ public final class Simulation {
     Simulation build() throws Exception {
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
-      return new Simulation(microbots, arena);
+      Simulation simulation = new Simulation(microbots, arena, simulationRate);
+
+      Events.WINDOW_REPAINT_DONE.register(simulation);
+      Events.SIMULATION_BUILD_NEW_CALLED.register(simulation);
+      Events.SIMULATION_RATE_CHANGED.register(simulation);
+
+      // Existing simulations will be registered for this event. By comparing themselves to the
+      // passed simulation, they will take this as a signal to break out of their run() loops.
+      Events.SIMULATION_BUILD_NEW_CALLED.post(simulation);
+
+      return simulation;
     }
   }
 }
