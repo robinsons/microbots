@@ -16,10 +16,23 @@ final class GraphicsUtil {
   // Not intended for instantiation.
   private GraphicsUtil() {}
 
-  /** Invokes the provided {@code drawDelegate} and resets the graphics transform when done. */
+  /**
+   * Invokes the provided {@code drawDelegate} and resets the graphics transform when done. This
+   * variation of the {@code drawAndPreserveTransform} function is useful if callers would like to
+   * provide a method reference.
+   */
   static void drawAndPreserveTransform(Graphics2D g2, Consumer<Graphics2D> drawDelegate) {
+    drawAndPreserveTransform(g2, () -> drawDelegate.accept(g2));
+  }
+
+  /**
+   * Invokes the provided {@code drawDelegate} and resets the graphics transform when done. This
+   * variation of the {@code drawAndPreserveTransform} function is useful when callers plan to use a
+   * lambda, obviating the need to create a second Graphics2D handle.
+   */
+  static void drawAndPreserveTransform(Graphics2D g2, Runnable drawDelegate) {
     AffineTransform transform = g2.getTransform();
-    drawDelegate.accept(g2);
+    drawDelegate.run();
     g2.setTransform(transform);
   }
 

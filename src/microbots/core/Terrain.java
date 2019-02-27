@@ -2,7 +2,6 @@ package microbots.core;
 
 import static com.google.common.collect.MoreCollectors.toOptional;
 
-import java.awt.Color;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -10,32 +9,22 @@ import java.util.stream.Stream;
 enum Terrain {
 
   /** A field is just an empty space on a map. Microbots can move onto this terrain. */
-  FIELD(' ', true, Optional.empty()),
+  FIELD(' ', true),
 
   /** A wall blocks microbot movement. */
-  WALL('w', false, Optional.of(UIConstants.WALL_COLOR));
+  WALL('w', false);
 
   private final char symbol;
   private final boolean isTraversable;
-  private final Optional<Color> color;
 
-  Terrain(char symbol, boolean isTraversable, Optional<Color> color) {
+  Terrain(char symbol, boolean isTraversable) {
     this.symbol = symbol;
     this.isTraversable = isTraversable;
-    this.color = color;
   }
 
   /** Returns whether or not this terrain allows microbots to move onto it. */
   boolean isTraversable() {
     return isTraversable;
-  }
-
-  /**
-   * Returns the color that should be used when drawing this terrain. If {@link Optional#empty()} is
-   * returned, then this terrain should not be drawn.
-   */
-  Optional<Color> color() {
-    return color;
   }
 
   /**

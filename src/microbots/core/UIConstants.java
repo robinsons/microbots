@@ -15,31 +15,31 @@ final class UIConstants {
   // Not intended for instantiation.
   private UIConstants() {}
 
-  static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
-  static final Color WALL_COLOR = Color.GRAY;
+  // Fonts used in the UI.
   static final String FONT_FILENAME = "ARDESTINE.ttf";
   static final Font BASE_FONT = loadFont();
 
-  // Microbot sizes in the arena.
+  // Colors for various aspects of the UI.
+  static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
+  static final Color WALL_COLOR = Color.GRAY;
+  static final Color MICROBOT_DIRECTIONAL_VECTOR_COLOR = BACKGROUND_COLOR;
+
+  // Sizes of elements of the UI.
+  static final int ARENA_CELL_SIZE_PX = 12;
+  static final int SIDE_VIEW_WIDTH_PX = 250;
+
+  // Microbot sizes.
   static final int MICROBOT_PADDING_PX = 1;
-  static final int MICROBOT_INNER_SIZE_PX = 10;
-  static final int MICROBOT_OUTER_SIZE_PX = MICROBOT_INNER_SIZE_PX + 2 * MICROBOT_PADDING_PX;
-  static final int MICROBOT_HALF_INNER_SIZE_INT_PX = MICROBOT_INNER_SIZE_PX / 2;
-  static final double MICROBOT_HALF_INNER_SIZE_DOUBLE_PX = MICROBOT_INNER_SIZE_PX / 2.0d;
+  static final int MICROBOT_SIZE_PX = ARENA_CELL_SIZE_PX - 2 * MICROBOT_PADDING_PX;
+  static final int MICROBOT_HALF_SIZE_INT_PX = MICROBOT_SIZE_PX / 2;
+  static final double MICROBOT_HALF_SIZE_DOUBLE_PX = MICROBOT_SIZE_PX / 2.0d;
   static final Shape MICROBOT_NORTH_FACING_VECTOR_SHAPE =
       new Polygon(
           new int[] {
-            MICROBOT_HALF_INNER_SIZE_INT_PX,
-            MICROBOT_INNER_SIZE_PX - MICROBOT_PADDING_PX,
-            MICROBOT_PADDING_PX
+            MICROBOT_HALF_SIZE_INT_PX, MICROBOT_SIZE_PX - MICROBOT_PADDING_PX, MICROBOT_PADDING_PX
           },
-          new int[] {
-            MICROBOT_PADDING_PX, MICROBOT_HALF_INNER_SIZE_INT_PX, MICROBOT_HALF_INNER_SIZE_INT_PX
-          },
+          new int[] {MICROBOT_PADDING_PX, MICROBOT_HALF_SIZE_INT_PX, MICROBOT_HALF_SIZE_INT_PX},
           3);
-
-  // The info container side panel.
-  static final int SIDE_VIEW_WIDTH_PX = 250;
 
   /** Loads the font specified by {@link #FONT_FILENAME}. */
   private static Font loadFont() {
@@ -47,7 +47,7 @@ final class UIConstants {
     try (InputStream inputStream = Files.newInputStream(path)) {
       return Font.createFont(Font.TRUETYPE_FONT, inputStream);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException("Failed to load font.", e);
     }
   }
 }

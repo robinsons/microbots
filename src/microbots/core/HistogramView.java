@@ -1,8 +1,8 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.MICROBOT_OUTER_SIZE_PX;
 import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
 
 import com.google.common.collect.ImmutableList;
@@ -123,7 +123,7 @@ final class HistogramView extends View {
   static HistogramView createFor(Arena arena) {
     checkNotNull(arena);
     int width = SIDE_VIEW_WIDTH_PX;
-    int height = MICROBOT_OUTER_SIZE_PX * arena.rows() / 4;
+    int height = ARENA_CELL_SIZE_PX * arena.rows() / 4;
     return new HistogramView(
         PopulationTimeline.snapshot(arena)
             .onEveryQuery()
