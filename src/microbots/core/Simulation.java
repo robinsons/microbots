@@ -46,12 +46,6 @@ public final class Simulation {
           Action.ROTATE_RIGHT, Simulation::handleRotateRight,
           Action.HACK, Simulation::handleHack);
 
-  /**
-   * Specifies how long the simulation will sleep for between rounds. All microbots participating in
-   * the simulation will perform one action per round.
-   */
-  private static final long ROUND_DELAY_MILLIS = 100L;
-
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
 
