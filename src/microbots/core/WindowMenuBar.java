@@ -70,21 +70,12 @@ final class WindowMenuBar extends JMenuBar {
     item.setAccelerator(getKeyStroke(KeyEvent.VK_F5, 0));
     item.addActionListener(
         event ->
-            new Thread(
-                    () -> {
-                      try {
-                        Simulation.builder()
-                            .setPopulationSize(populationSize)
-                            .setArenaMap(arenaMap)
-                            .setSimulationRate(simulationRate)
-                            .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
-                            .build()
-                            .run();
-                      } catch (Exception e) {
-                        throw new RuntimeException(e);
-                      }
-                    })
-                .start());
+            Simulation.builder()
+                .setPopulationSize(populationSize)
+                .setArenaMap(arenaMap)
+                .setSimulationRate(simulationRate)
+                .addMpuTypes(ImmutableSet.copyOf(microbotTypes))
+                .startInternal());
     return item;
   }
 

@@ -30,17 +30,18 @@ final class Window extends JFrame {
 
   @Subscribe
   public void onSimulationRunCalled(SimulationRunCalledEvent event) {
-    if (windowPanel != null) {
-      remove(windowPanel);
-    }
+    Component oldWindowPanel = windowPanel;
     windowPanel = add(WindowPanel.createFor(event.simulation().arena()));
+    if (oldWindowPanel != null) {
+      remove(oldWindowPanel);
+    }
     pack();
     setLocationRelativeTo(null);
     setVisible(true);
   }
 
-  /** Returns a new {@link Window}. */
-  static Window create() {
+  /** Creates a new {@link Window}. */
+  static void create() {
     Window window = new Window();
     window.setTitle(WINDOW_TITLE);
     window.setResizable(false);
@@ -48,7 +49,5 @@ final class Window extends JFrame {
     window.setJMenuBar(WindowMenuBar.create());
 
     Events.register(window);
-
-    return window;
   }
 }

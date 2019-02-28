@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collections;
 import microbots.MicrobotProcessingUnit;
@@ -33,8 +32,7 @@ final class MicrobotFactory {
    * For each provided {@link MicrobotProcessingUnit mpuType} creates {@link #quantity} microbots.
    * The returned list is shuffled.
    */
-  ImmutableList<Microbot> ofEach(Iterable<Class<? extends MicrobotProcessingUnit>> mpuTypes)
-      throws Exception {
+  ImmutableList<Microbot> ofEach(Iterable<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
     checkNotNull(mpuTypes);
     ArrayList<Microbot> microbots = new ArrayList<>();
     for (Class<? extends MicrobotProcessingUnit> mpuType : mpuTypes) {
@@ -47,15 +45,21 @@ final class MicrobotFactory {
   /**
    * Creates {@link #quantity} microbots each with the given {@link MicrobotProcessingUnit mpuType}.
    */
-  private <MpuT extends MicrobotProcessingUnit> ArrayList<Microbot> of(Class<MpuT> mpuType)
-      throws Exception {
+  private <MpuT extends MicrobotProcessingUnit> ArrayList<Microbot> of(Class<MpuT> mpuType) {
     checkNotNull(mpuType);
     ArrayList<Microbot> microbots = new ArrayList<>(quantity);
-    Constructor<MpuT> constructor = mpuType.getConstructor();
     for (int i = 0; i < quantity; i++) {
-      MpuT mpu = constructor.newInstance();
-      Direction facing = Direction.random();
-      microbots.add(new Microbot(mpu, facing));
+      try {
+        MpuT mpu = mpuType.newInstance();
+        Direction facing = Direction.random();
+        microbots.add(new Microbot(mpu, facing));
+      } catch (Exception e) {
+        System.err.printf(
+            "Encountered error constructing microbot %s; skipping this type.\n",
+            mpuType.getSimpleName());
+        e.printStackTrace();
+        return new ArrayList<>();
+      }
     }
     return microbots;
   }

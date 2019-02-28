@@ -33,7 +33,7 @@ import microbots.core.Events.WindowRepaintDoneEvent;
  *       .start();
  * </pre>
  */
-public final class Simulation {
+public final class Simulation implements Runnable {
 
   /** Simple functional interface to provide type clarity for the {@link #ACTION_DELEGATES} map. */
   @FunctionalInterface
@@ -91,7 +91,8 @@ public final class Simulation {
   }
 
   /** Runs the simulation! */
-  void run() throws Exception {
+  @Override
+  public void run() {
     Events.post(new SimulationRunCalledEvent(this));
 
     while (!terminationRequested) {
@@ -100,7 +101,11 @@ public final class Simulation {
       windowRepaintDoneCalled = false;
       Events.post(new SimulationRoundDoneEvent());
       do {
-        Thread.sleep(simulationRate.millisPerRound());
+        try {
+          Thread.sleep(simulationRate.millisPerRound());
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       } while (!windowRepaintDoneCalled);
     }
 
@@ -186,9 +191,9 @@ public final class Simulation {
      * Builds a simulation based on the parameters of this builder, and then starts it in a new
      * window.
      */
-    public void start() throws Exception {
+    public void start() {
       Window.create();
-      build().run();
+      startInternal();
     }
 
     // PUBLIC API ENDS HERE. Below this point is the internal API.
@@ -225,15 +230,18 @@ public final class Simulation {
       return this;
     }
 
-    /** Builds a simulation based on the parameters of this builder, but does not start it. */
-    Simulation build() throws Exception {
+    /**
+     * Builds a simulation based on the parameters of this builder and then starts it in its own
+     * thread.
+     */
+    void startInternal() {
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
       Simulation simulation = new Simulation(microbots, arena, simulationRate);
 
       Events.register(simulation);
 
-      return simulation;
+      new Thread(simulation).start();
     }
   }
 }
