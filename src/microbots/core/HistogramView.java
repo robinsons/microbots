@@ -38,18 +38,22 @@ final class HistogramView extends View {
       Comparator.comparing(Population::name);
 
   private final PopulationTimeline timeline;
-  private final Font font;
+//  private final Font font;
 
-  private HistogramView(PopulationTimeline timeline, Font font, int width, int height) {
+  private HistogramView(
+      PopulationTimeline timeline,
+//      Font font,
+      int width,
+      int height) {
     super(width, height, BACKGROUND_COLOR);
     this.timeline = timeline;
-    this.font = font;
+//    this.font = font;
   }
 
   @Override
   public void paint(Graphics2D g2) {
     PopulationSnapshot oldestSnapshot = timeline.oldest();
-    drawGridLines(g2, oldestSnapshot.globalPopulation());
+//    drawGridLines(g2, oldestSnapshot.globalPopulation());
 
     long elapsedTimeMillis = System.currentTimeMillis() - oldestSnapshot.creationTimeMillis();
     long xAbsolute = width() * elapsedTimeMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
@@ -76,7 +80,7 @@ final class HistogramView extends View {
 
   /** Draws grid lines to indicate population thresholds. */
   private void drawGridLines(Graphics2D g2, int globalPopulation) {
-    g2.setFont(font);
+//    g2.setFont(font);
     g2.setColor(GRID_COLOR);
 
     int multiplier = 1 + (globalPopulation / GRID_POPULATION_BUCKET_SIZE);
@@ -155,11 +159,11 @@ final class HistogramView extends View {
   static HistogramView createFor(Arena arena) {
     checkNotNull(arena);
 
-    Font arialSize11 =
-        Stream.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
-            .filter(f -> "Arial".equals(f.getFontName()))
-            .collect(onlyElement())
-            .deriveFont(11.0f);
+//    Font arialSize11 =
+//        Stream.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
+//            .filter(f -> "Arial".equals(f.getFontName()))
+//            .collect(onlyElement())
+//            .deriveFont(11.0f);
 
     int width = SIDE_VIEW_WIDTH_PX;
     int height = ARENA_CELL_SIZE_PX * arena.rows() / 4;
@@ -168,7 +172,7 @@ final class HistogramView extends View {
         PopulationTimeline.snapshot(arena)
             .onEveryQuery()
             .retainFor(TIMELINE_RETENTION_PERIOD_MILLIS),
-        arialSize11,
+//        arialSize11,
         width,
         height);
   }
