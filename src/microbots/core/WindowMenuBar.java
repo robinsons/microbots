@@ -23,6 +23,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import microbots.MicrobotProcessingUnit;
+import microbots.core.Events.SimulationRateChangedEvent;
 
 /**
  * The menu bar offers options for controlling the running simulation. For example, one can change
@@ -222,7 +223,7 @@ final class WindowMenuBar extends JMenuBar {
       item.addActionListener(
           event -> {
             simulationRate = rate;
-            Events.SIMULATION_RATE_CHANGED.post(rate);
+            Events.post(new SimulationRateChangedEvent(rate));
           });
 
       group.add(item);

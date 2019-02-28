@@ -4,6 +4,9 @@ import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
 import java.awt.Graphics;
 import javax.swing.JFrame;
+import microbots.core.Events.SimulationRoundDoneEvent;
+import microbots.core.Events.SimulationRunCalledEvent;
+import microbots.core.Events.WindowRepaintDoneEvent;
 
 /** The window holds UI components that show the simulation as it runs. */
 final class Window extends JFrame {
@@ -17,44 +20,23 @@ final class Window extends JFrame {
   @Override
   public void paint(Graphics g) {
     super.paint(g);
-    Events.WINDOW_REPAINT_DONE.post("bar");
+    Events.post(new WindowRepaintDoneEvent());
   }
 
-  /** Callback for {@link Events#SIMULATION_ROUND_DONE}. */
   @Subscribe
-  public void onSimulationRoundDone(String ignored) {
+  public void onSimulationRoundDone(SimulationRoundDoneEvent event) {
     repaint();
   }
 
-  /** Callback for {@link Events#SIMULATION_BUILD_NEW_CALLED}. */
   @Subscribe
-  public void onSimulationBuildNewCalled(Simulation simulation) {
-    setSimulation(simulation);
-  }
-
-  /**
-   * Sets simulation that this window will display. Removes the existing simulation and its UI
-   * components, if any.
-   */
-  private void setSimulation(Simulation simulation) {
-    reset();
-
-    this.windowPanel = add(WindowPanel.createFor(simulation.arena()));
-
-    pack();
-    setLocationRelativeTo(null);
-    setVisible(true);
-  }
-
-  /**
-   * Resets this window by removing components, nulling out the simulation, and making it not
-   * visible.
-   */
-  private void reset() {
+  public void onSimulationRunCalled(SimulationRunCalledEvent event) {
     if (windowPanel != null) {
       remove(windowPanel);
     }
-    windowPanel = null;
+    windowPanel = add(WindowPanel.createFor(event.simulation().arena()));
+    pack();
+    setLocationRelativeTo(null);
+    setVisible(true);
   }
 
   /** Returns a new {@link Window}. */
@@ -65,8 +47,7 @@ final class Window extends JFrame {
     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     window.setJMenuBar(WindowMenuBar.create());
 
-    Events.SIMULATION_ROUND_DONE.register(window);
-    Events.SIMULATION_BUILD_NEW_CALLED.register(window);
+    Events.register(window);
 
     return window;
   }

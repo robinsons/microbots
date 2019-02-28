@@ -14,6 +14,10 @@ import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.State;
 import microbots.Surroundings;
+import microbots.core.Events.SimulationRateChangedEvent;
+import microbots.core.Events.SimulationRoundDoneEvent;
+import microbots.core.Events.SimulationRunCalledEvent;
+import microbots.core.Events.WindowRepaintDoneEvent;
 
 /**
  * Entry point for configuring a microbot battle simulation. Example usage:
@@ -71,39 +75,36 @@ public final class Simulation {
     return arena;
   }
 
-  /** Callback for {@link Events#SIMULATION_BUILD_NEW_CALLED}. */
   @Subscribe
-  public void onSimulationBuildNewCalled(Simulation simulation) {
-    terminationRequested = this != simulation;
+  public void onSimulationRunCalled(SimulationRunCalledEvent event) {
+    terminationRequested = this != event.simulation();
   }
 
-  /** Callback for {@link Events#SIMULATION_RATE_CHANGED}. */
   @Subscribe
-  public void onSimulationRateChanged(SimulationRate simulationRate) {
-    this.simulationRate = simulationRate;
+  public void onSimulationRateChanged(SimulationRateChangedEvent event) {
+    simulationRate = event.simulationRate();
   }
 
-  /** Callback for {@link Events#WINDOW_REPAINT_DONE}. */
   @Subscribe
-  public void onWindowRepaintDone(String ignored) {
+  public void onWindowRepaintDone(WindowRepaintDoneEvent event) {
     windowRepaintDoneCalled = true;
   }
 
   /** Runs the simulation! */
   void run() throws Exception {
+    Events.post(new SimulationRunCalledEvent(this));
+
     while (!terminationRequested) {
       doRound();
 
       windowRepaintDoneCalled = false;
-      Events.SIMULATION_ROUND_DONE.post("foo");
+      Events.post(new SimulationRoundDoneEvent());
       do {
         Thread.sleep(simulationRate.millisPerRound());
       } while (!windowRepaintDoneCalled);
     }
 
-    Events.WINDOW_REPAINT_DONE.unregister(this);
-    Events.SIMULATION_BUILD_NEW_CALLED.unregister(this);
-    Events.SIMULATION_RATE_CHANGED.unregister(this);
+    Events.unregister(this);
   }
 
   /**
@@ -230,13 +231,7 @@ public final class Simulation {
       Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
       Simulation simulation = new Simulation(microbots, arena, simulationRate);
 
-      Events.WINDOW_REPAINT_DONE.register(simulation);
-      Events.SIMULATION_BUILD_NEW_CALLED.register(simulation);
-      Events.SIMULATION_RATE_CHANGED.register(simulation);
-
-      // Existing simulations will be registered for this event. By comparing themselves to the
-      // passed simulation, they will take this as a signal to break out of their run() loops.
-      Events.SIMULATION_BUILD_NEW_CALLED.post(simulation);
+      Events.register(simulation);
 
       return simulation;
     }
