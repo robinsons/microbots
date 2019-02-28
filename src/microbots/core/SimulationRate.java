@@ -5,7 +5,7 @@ enum SimulationRate {
   NORMAL(100L, "Normal - 100 ms"),
   FAST(50L, "Fast - 50 ms"),
   FASTER(16L, "Faster - 16 ms"),
-  FASTEST(1L, "Fastest - 1 ms");
+  FASTEST(5L, "Fastest - 5 ms");
 
   private final long millisPerRound;
   private final String description;
