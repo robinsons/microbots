@@ -1,6 +1,7 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.MoreCollectors.onlyElement;
 import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
 import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
@@ -8,19 +9,27 @@ import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 import microbots.core.PopulationSnapshot.Population;
 
 /** Shows a histogram displaying microbot populations over time. */
 final class HistogramView extends View {
 
+  private static final int GRID_POPULATION_INCREMENT = 50;
+  private static final int GRID_POPULATION_BUCKET_SIZE = 500;
+  private static final Color GRID_COLOR = Color.GRAY;
+
   private static final int Y_THRESHOLD_PX = 3;
   private static final long TIMELINE_RETENTION_PERIOD_MILLIS = 5000L;
-  private static final double TIMELINE_FILL_RATIO = 0.9;
+  private static final double TIMELINE_FILL_RATIO = 0.8;
 
   private static final Stroke POPULATION_STROKE =
       new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -29,15 +38,18 @@ final class HistogramView extends View {
       Comparator.comparing(Population::name);
 
   private final PopulationTimeline timeline;
+  private final Font font;
 
-  private HistogramView(PopulationTimeline timeline, int width, int height) {
+  private HistogramView(PopulationTimeline timeline, Font font, int width, int height) {
     super(width, height, BACKGROUND_COLOR);
     this.timeline = timeline;
+    this.font = font;
   }
 
   @Override
   public void paint(Graphics2D g2) {
     PopulationSnapshot oldestSnapshot = timeline.oldest();
+    drawGridLines(g2, oldestSnapshot.globalPopulation());
 
     long elapsedTimeMillis = System.currentTimeMillis() - oldestSnapshot.creationTimeMillis();
     long xAbsolute = width() * elapsedTimeMillis / TIMELINE_RETENTION_PERIOD_MILLIS;
@@ -60,6 +72,26 @@ final class HistogramView extends View {
                 oldestSnapshot.globalPopulation(),
                 oldestSnapshot.creationTimeMillis(),
                 g2));
+  }
+
+  /** Draws grid lines to indicate population thresholds. */
+  private void drawGridLines(Graphics2D g2, int globalPopulation) {
+    g2.setFont(font);
+    g2.setColor(GRID_COLOR);
+
+    int multiplier = 1 + (globalPopulation / GRID_POPULATION_BUCKET_SIZE);
+    int increment = multiplier * GRID_POPULATION_INCREMENT;
+
+    for (int populationLevel = 0;
+        populationLevel < globalPopulation;
+        populationLevel += increment) {
+      int y = height() - (height() * populationLevel / globalPopulation);
+      String populationText = String.format("%d", populationLevel);
+      int textWidth = g2.getFontMetrics().stringWidth(populationText);
+
+      g2.drawString(populationText, width() - textWidth - 2, y - 1);
+      g2.drawLine(0, y, width(), y);
+    }
   }
 
   /** Draws a population timeline for a single population. */
@@ -122,12 +154,21 @@ final class HistogramView extends View {
   /** Returns a new view for the given {@link Arena}. */
   static HistogramView createFor(Arena arena) {
     checkNotNull(arena);
+
+    Font arialSize11 =
+        Stream.of(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts())
+            .filter(f -> "Arial".equals(f.getFontName()))
+            .collect(onlyElement())
+            .deriveFont(11.0f);
+
     int width = SIDE_VIEW_WIDTH_PX;
     int height = ARENA_CELL_SIZE_PX * arena.rows() / 4;
+
     return new HistogramView(
         PopulationTimeline.snapshot(arena)
             .onEveryQuery()
             .retainFor(TIMELINE_RETENTION_PERIOD_MILLIS),
+        arialSize11,
         width,
         height);
   }
