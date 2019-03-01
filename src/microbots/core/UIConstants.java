@@ -16,8 +16,8 @@ final class UIConstants {
   private UIConstants() {}
 
   // Fonts used in the UI.
-  static final String FONT_FILENAME = "ARDESTINE.ttf";
-  static final Font BASE_FONT = loadFont();
+  static final Font EXO_EXTRA_BOLD = loadFont("Exo-ExtraBold.ttf");
+  static final Font RATIONAL_INTEGER = loadFont("RationalInteger.ttf");
 
   // Colors for various aspects of the UI.
   static final Color BACKGROUND_COLOR = Color.DARK_GRAY;
@@ -41,9 +41,9 @@ final class UIConstants {
           new int[] {MICROBOT_PADDING_PX, MICROBOT_HALF_SIZE_INT_PX, MICROBOT_HALF_SIZE_INT_PX},
           3);
 
-  /** Loads the font specified by {@link #FONT_FILENAME}. */
-  private static Font loadFont() {
-    Path path = Paths.get(System.getProperty("user.dir"), "res", "fonts", FONT_FILENAME);
+  /** Loads the font specified by {@code filename}. */
+  private static Font loadFont(String filename) {
+    Path path = Paths.get(System.getProperty("user.dir"), "res", "fonts", filename);
     try (InputStream inputStream = Files.newInputStream(path)) {
       return Font.createFont(Font.TRUETYPE_FONT, inputStream);
     } catch (Exception e) {

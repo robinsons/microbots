@@ -4,7 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static microbots.core.GraphicsUtil.drawStringWithShadow;
 import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.BASE_FONT;
+import static microbots.core.UIConstants.EXO_EXTRA_BOLD;
 import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
 
 import com.google.common.collect.ImmutableList;
@@ -81,6 +81,6 @@ final class PopulationView extends View {
     int width = SIDE_VIEW_WIDTH_PX;
     int height = 3 * ARENA_CELL_SIZE_PX * arena.rows() / 4;
     return new PopulationView(
-        PopulationSnapshot.of(arena), BASE_FONT.deriveFont(FONT_SIZE), width, height);
+        PopulationSnapshot.of(arena), EXO_EXTRA_BOLD.deriveFont(FONT_SIZE), width, height);
   }
 }
