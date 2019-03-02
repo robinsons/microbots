@@ -4,7 +4,6 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.Color;
-import java.lang.reflect.Constructor;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
@@ -82,8 +81,7 @@ final class Microbot {
     checkNotNull(other);
     if (classify(other) == Obstacle.ENEMY) {
       try {
-        Constructor<? extends MicrobotProcessingUnit> constructor = mpu.getClass().getConstructor();
-        other.mpu = constructor.newInstance();
+        other.mpu = mpu.getClass().newInstance();
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

@@ -7,9 +7,6 @@ public abstract class MicrobotProcessingUnit {
 
   private final String simpleName = getClass().getSimpleName();
 
-  /** Default constructor to ensure subclasses have a zero-parameter constructor. */
-  public MicrobotProcessingUnit() {}
-
   /**
    * Returns the name of this microbot. Defaults to the class name, but may be overridden by
    * subclasses. If null is returned, will use the class name.
