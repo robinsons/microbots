@@ -27,7 +27,6 @@ import microbots.core.Events.WindowRepaintDoneEvent;
  *   static final class MicrobotPrime extends MicrobotProcesingUnit { ... }
  *   ...
  *   Simulation.builder()
- *       .setPopulationSize(500)
  *       .addMpuType(Microbot9000.class)
  *       .addMpuType(MicrobotPrime.class)
  *       .start();
