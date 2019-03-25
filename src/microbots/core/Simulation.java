@@ -27,6 +27,7 @@ import microbots.core.Events.WindowRepaintDoneEvent;
  *   static final class MicrobotPrime extends MicrobotProcesingUnit { ... }
  *   ...
  *   Simulation.builder()
+ *       .setPopulationSize(500)
  *       .addMpuType(Microbot9000.class)
  *       .addMpuType(MicrobotPrime.class)
  *       .start();
@@ -179,6 +180,16 @@ public final class Simulation implements Runnable {
 
     // PUBLIC API
 
+    /**
+     * Sets the population size, which is the number of microbots of each type that will be included
+     * in the simulation. Must be positive.
+     */
+    public Builder setPopulationSize(int populationSize) {
+      checkArgument(populationSize > 0, "populationSize must be positive.");
+      this.populationSize = populationSize;
+      return this;
+    }
+
     /** Adds a new {@link MicrobotProcessingUnit MPU type} to be included in the simulation. */
     public Builder addMpuType(Class<? extends MicrobotProcessingUnit> mpuType) {
       checkNotNull(mpuType);
@@ -204,16 +215,6 @@ public final class Simulation implements Runnable {
     Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
       checkNotNull(mpuTypes);
       mpuTypes.forEach(this::addMpuType);
-      return this;
-    }
-
-    /**
-     * Sets the population size, which is the number of microbots of each type that will be included
-     * in the simulation. Must be positive.
-     */
-    Builder setPopulationSize(int populationSize) {
-      checkArgument(populationSize > 0, "populationSize must be positive.");
-      this.populationSize = populationSize;
       return this;
     }
 
