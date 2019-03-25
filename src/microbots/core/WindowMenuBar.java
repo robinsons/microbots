@@ -12,10 +12,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -36,13 +36,15 @@ final class WindowMenuBar extends JMenuBar {
   private static final int POPULATION_SIZE_STEP = 100;
 
   private SimulationRate simulationRate = SimulationDefaults.SIMULATION_RATE;
-  private int populationSize = SimulationDefaults.POPULATION_SIZE;
   private ArenaMap arenaMap = SimulationDefaults.ARENA_MAP;
+  private int populationSize;
 
-  private final List<Class<? extends MicrobotProcessingUnit>> microbotTypes;
+  private final Collection<Class<? extends MicrobotProcessingUnit>> microbotTypes;
 
-  private WindowMenuBar(List<Class<? extends MicrobotProcessingUnit>> microbotTypes) {
+  private WindowMenuBar(
+      Collection<Class<? extends MicrobotProcessingUnit>> microbotTypes, int populationSize) {
     this.microbotTypes = microbotTypes;
+    this.populationSize = populationSize;
   }
 
   /**
@@ -84,16 +86,27 @@ final class WindowMenuBar extends JMenuBar {
     JMenu menu = new JMenu("Population Size");
     menu.setMnemonic(KeyEvent.VK_P);
 
-    ButtonGroup group = new ButtonGroup();
+    IntStream.Builder populationSizes = IntStream.builder();
+    populationSizes.accept(populationSize);
     for (int i = MINIMUM_POPULATION_SIZE; i <= MAXIMUM_POPULATION_SIZE; i += POPULATION_SIZE_STEP) {
-      int populationSize = i;
-      JRadioButtonMenuItem item = new JRadioButtonMenuItem(String.format("%d", populationSize));
-      item.setSelected(populationSize == this.populationSize);
-      item.addActionListener(event -> this.populationSize = populationSize);
-
-      group.add(item);
-      menu.add(item);
+      populationSizes.accept(i);
     }
+
+    ButtonGroup group = new ButtonGroup();
+    populationSizes
+        .build()
+        .distinct()
+        .sorted()
+        .forEach(
+            populationSize -> {
+              JRadioButtonMenuItem item =
+                  new JRadioButtonMenuItem(String.format("%d", populationSize));
+              item.setSelected(populationSize == this.populationSize);
+              item.addActionListener(event -> this.populationSize = populationSize);
+
+              group.add(item);
+              menu.add(item);
+            });
 
     return menu;
   }
@@ -158,7 +171,6 @@ final class WindowMenuBar extends JMenuBar {
   /** Adds menu items that allow the user to toggle individual microbot types. */
   private void addMicrobotTypeSection(JMenu menu) {
     ImmutableList<Class<? extends MicrobotProcessingUnit>> microbotTypes = fetchMicrobotTypes();
-    WindowMenuBar.this.microbotTypes.addAll(microbotTypes);
     for (Class<? extends MicrobotProcessingUnit> microbotType : microbotTypes) {
       JCheckBoxMenuItem item = new JCheckBoxMenuItem(microbotType.getSimpleName());
       item.setSelected(WindowMenuBar.this.microbotTypes.contains(microbotType));
@@ -226,7 +238,10 @@ final class WindowMenuBar extends JMenuBar {
   }
 
   /** Creates a new {@link WindowMenuBar}. */
-  static WindowMenuBar create() {
-    return new WindowMenuBar(new ArrayList<>()).addSimulationSettingsMenu().addSimulationRateMenu();
+  static WindowMenuBar create(
+      Collection<Class<? extends MicrobotProcessingUnit>> selectedMpuTypes, int populationSize) {
+    return new WindowMenuBar(selectedMpuTypes, populationSize)
+        .addSimulationSettingsMenu()
+        .addSimulationRateMenu();
   }
 }

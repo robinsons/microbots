@@ -3,7 +3,9 @@ package microbots.core;
 import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.util.Collection;
 import javax.swing.JFrame;
+import microbots.MicrobotProcessingUnit;
 import microbots.core.Events.SimulationRoundDoneEvent;
 import microbots.core.Events.SimulationRunCalledEvent;
 import microbots.core.Events.WindowRepaintDoneEvent;
@@ -41,12 +43,13 @@ final class Window extends JFrame {
   }
 
   /** Creates a new {@link Window}. */
-  static void create() {
+  static void create(
+      Collection<Class<? extends MicrobotProcessingUnit>> selectedMpuTypes, int populationSize) {
     Window window = new Window();
     window.setTitle(WINDOW_TITLE);
     window.setResizable(false);
     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    window.setJMenuBar(WindowMenuBar.create());
+    window.setJMenuBar(WindowMenuBar.create(selectedMpuTypes, populationSize));
 
     Events.register(window);
   }

@@ -202,7 +202,7 @@ public final class Simulation implements Runnable {
      * window.
      */
     public void start() {
-      Window.create();
+      Window.create(mpuTypes, populationSize);
       startInternal();
     }
 
