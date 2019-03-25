@@ -6,8 +6,8 @@ import microbots.MicrobotProcessingUnit;
 import microbots.State;
 
 /**
- * Challenge: Create a bot that moves in a "circle" fashion. It should one cell north, then one cell
- * east, then one cell south, then one cell west, and repeat.
+ * Challenge: Create a bot that moves in a "circle" fashion. It should move one cell north, then one
+ * cell east, then one cell south, then one cell west, and repeat.
  */
 public final class Looper1 extends MicrobotProcessingUnit {
   @Override
