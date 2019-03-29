@@ -4,6 +4,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.awt.Color;
+import java.util.HashMap;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.Obstacle;
@@ -11,6 +12,8 @@ import microbots.State;
 
 /** Wraps a {@link MicrobotProcessingUnit} along with additional data for the simulation. */
 final class Microbot {
+
+  private static final HashMap<Class<? extends MicrobotProcessingUnit>, Color> MPU_COLOR_CACHE = new HashMap<>();
 
   private MicrobotProcessingUnit mpu;
   private Direction facing;
@@ -33,7 +36,10 @@ final class Microbot {
 
   /** @see MicrobotProcessingUnit#color() */
   Color color() {
-    return firstNonNull(mpu.color(), Color.WHITE);
+    if (!MPU_COLOR_CACHE.containsKey(mpu.getClass())) {
+      MPU_COLOR_CACHE.put(mpu.getClass(), firstNonNull(mpu.color(), Color.WHITE));
+    }
+    return MPU_COLOR_CACHE.get(mpu.getClass());
   }
 
   /** @see MicrobotProcessingUnit#getAction(State) */
