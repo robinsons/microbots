@@ -38,8 +38,10 @@ final class Window extends JFrame {
       remove(oldWindowPanel);
     }
     pack();
-    setLocationRelativeTo(null);
-    setVisible(true);
+    if (!isVisible()) {
+      setLocationRelativeTo(null);
+      setVisible(true);
+    }
   }
 
   /** Creates a new {@link Window}. */
