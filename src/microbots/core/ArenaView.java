@@ -32,7 +32,7 @@ final class ArenaView extends View {
       ImmutableMap.of(Terrain.WALL, ArenaView::createWallImage);
   private static final ImmutableMap<Terrain, BufferedImage> TERRAIN_IMAGES = createTerrainImages();
 
-  private static HashMap<String, BufferedImage> MICROBOT_IMAGES = new HashMap<>();
+  private static HashMap<Class<?>, BufferedImage> MICROBOT_IMAGES = new HashMap<>();
 
   private final Arena arena;
 
@@ -79,7 +79,7 @@ final class ArenaView extends View {
                     microbot.facing().compassAngleRadians(),
                     MICROBOT_PADDING_PX + MICROBOT_HALF_SIZE_DOUBLE_PX,
                     MICROBOT_PADDING_PX + MICROBOT_HALF_SIZE_DOUBLE_PX);
-                g2.drawImage(MICROBOT_IMAGES.get(microbot.name()), null, 0, 0);
+                g2.drawImage(MICROBOT_IMAGES.get(microbot.mpuType()), null, 0, 0);
               });
         });
   }
@@ -107,7 +107,7 @@ final class ArenaView extends View {
    * direct calls to methods like {@link Graphics2D#fill(Shape)}.
    */
   private static void maybeCreateMicrobotImage(Microbot microbot) {
-    if (!MICROBOT_IMAGES.containsKey(microbot.name())) {
+    if (!MICROBOT_IMAGES.containsKey(microbot.mpuType())) {
       BufferedImage image =
           createArenaElementImage(
               g2 -> {
@@ -117,7 +117,7 @@ final class ArenaView extends View {
                 g2.setColor(MICROBOT_DIRECTIONAL_VECTOR_COLOR);
                 g2.fill(MICROBOT_NORTH_FACING_VECTOR_SHAPE);
               });
-      MICROBOT_IMAGES.put(microbot.name(), image);
+      MICROBOT_IMAGES.put(microbot.mpuType(), image);
     }
   }
 

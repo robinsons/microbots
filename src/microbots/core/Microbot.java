@@ -13,7 +13,8 @@ import microbots.State;
 /** Wraps a {@link MicrobotProcessingUnit} along with additional data for the simulation. */
 final class Microbot {
 
-  private static final HashMap<Class<? extends MicrobotProcessingUnit>, Color> MPU_COLOR_CACHE = new HashMap<>();
+  private static final HashMap<Class<? extends MicrobotProcessingUnit>, Color> MPU_COLOR_CACHE =
+      new HashMap<>();
 
   private MicrobotProcessingUnit mpu;
   private Direction facing;
@@ -46,6 +47,11 @@ final class Microbot {
   Action getAction(State state) {
     checkNotNull(state);
     return firstNonNull(mpu.getAction(state), Action.WAIT);
+  }
+
+  /** Returns the type of this microbot's MPU. */
+  Class<? extends MicrobotProcessingUnit> mpuType() {
+    return mpu.getClass();
   }
 
   /** Returns the row this microbot is located at in the arena. */
@@ -87,7 +93,7 @@ final class Microbot {
     checkNotNull(other);
     if (classify(other) == Obstacle.ENEMY) {
       try {
-        other.mpu = mpu.getClass().newInstance();
+        other.mpu = this.mpuType().newInstance();
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
@@ -100,6 +106,6 @@ final class Microbot {
    */
   Obstacle classify(Microbot other) {
     checkNotNull(other);
-    return other.mpu.getClass().equals(this.mpu.getClass()) ? Obstacle.FRIEND : Obstacle.ENEMY;
+    return other.mpuType().equals(this.mpuType()) ? Obstacle.FRIEND : Obstacle.ENEMY;
   }
 }
