@@ -25,7 +25,7 @@ public final class ScrapPile extends MicrobotProcessingUnit {
    *       150) -> new Color(50, 100, 150)
    * </ul>
    */
-  private static final Color COLOR = new Color(0xa0ccef);
+  private static final Color COLOR = new Color(0xed6565);
 
   /** Override this method to give your bot its own color. */
   @Override
