@@ -28,10 +28,6 @@ public final class Events {
     EVENT_BUS.post(event);
   }
 
-  /** Event that is posted by the {@link Window} each time it finishes repainting itself. */
-  public static final class WindowRepaintDoneEvent implements Event {
-  }
-
   /** Event that is posted by the running {@link Simulation} each time it completes a round. */
   public static final class SimulationRoundDoneEvent implements Event {
   }
@@ -52,19 +48,4 @@ public final class Events {
     }
   }
 
-  /**
-   * Event that is posted by an action listener in the {@link microbots.core.ui.WindowMenuBar} each
-   * time the user selects a new {@link SimulationRate} from the dropdown menu.
-   */
-  public static final class SimulationRateChangedEvent implements Event {
-    private final SimulationRate simulationRate;
-
-    public SimulationRateChangedEvent(SimulationRate simulationRate) {
-      this.simulationRate = simulationRate;
-    }
-
-    public SimulationRate simulationRate() {
-      return simulationRate;
-    }
-  }
 }

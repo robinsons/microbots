@@ -15,10 +15,10 @@ import microbots.MicrobotProcessingUnit;
 import microbots.State;
 import microbots.Surroundings;
 import microbots.core.util.Events;
-import microbots.core.util.Events.SimulationRateChangedEvent;
+import microbots.core.ui.events.SimulationRateChangedEvent;
 import microbots.core.util.Events.SimulationRoundDoneEvent;
 import microbots.core.util.Events.SimulationRunCalledEvent;
-import microbots.core.util.Events.WindowRepaintDoneEvent;
+import microbots.core.ui.events.WindowRepaintDoneEvent;
 import microbots.core.ui.Window;
 
 /**

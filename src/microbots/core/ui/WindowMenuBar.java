@@ -25,7 +25,7 @@ import javax.swing.JRadioButtonMenuItem;
 import microbots.MicrobotProcessingUnit;
 import microbots.core.model.ArenaMap;
 import microbots.core.util.Events;
-import microbots.core.util.Events.SimulationRateChangedEvent;
+import microbots.core.ui.events.SimulationRateChangedEvent;
 import microbots.core.model.Simulation;
 import microbots.core.model.SimulationDefaults;
 import microbots.core.model.SimulationRate;
