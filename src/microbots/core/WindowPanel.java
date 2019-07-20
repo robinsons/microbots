@@ -1,8 +1,8 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.GraphicsUtil.drawAndPreserveTransform;
-import static microbots.core.GraphicsUtil.drawWithinBounds;
+import static microbots.core.ui.GraphicsUtil.drawAndPreserveTransform;
+import static microbots.core.ui.GraphicsUtil.drawWithinBounds;
 
 import java.awt.Color;
 import java.awt.Dimension;

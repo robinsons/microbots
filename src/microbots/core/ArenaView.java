@@ -2,7 +2,7 @@ package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
-import static microbots.core.GraphicsUtil.drawAndPreserveTransform;
+import static microbots.core.ui.GraphicsUtil.drawAndPreserveTransform;
 import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
 import static microbots.core.UIConstants.MICROBOT_DIRECTIONAL_VECTOR_COLOR;
@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import microbots.core.ui.GraphicsUtil;
 
 /** Shows the positions of the microbots in the arena. */
 final class ArenaView extends View {

@@ -1,7 +1,7 @@
 package microbots.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.GraphicsUtil.drawStringWithShadow;
+import static microbots.core.ui.GraphicsUtil.drawStringWithShadow;
 import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
 import static microbots.core.UIConstants.BACKGROUND_COLOR;
 import static microbots.core.UIConstants.EXO_EXTRA_BOLD;
