@@ -7,8 +7,8 @@ import java.util.Collection;
 import javax.swing.JFrame;
 import microbots.MicrobotProcessingUnit;
 import microbots.core.util.Events;
-import microbots.core.util.Events.SimulationRoundDoneEvent;
-import microbots.core.util.Events.SimulationRunCalledEvent;
+import microbots.core.model.events.SimulationRoundDoneEvent;
+import microbots.core.model.events.SimulationRunCalledEvent;
 import microbots.core.ui.events.WindowRepaintDoneEvent;
 
 /** The window holds UI components that show the simulation as it runs. */

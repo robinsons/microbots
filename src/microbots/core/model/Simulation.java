@@ -16,8 +16,8 @@ import microbots.State;
 import microbots.Surroundings;
 import microbots.core.util.Events;
 import microbots.core.ui.events.SimulationRateChangedEvent;
-import microbots.core.util.Events.SimulationRoundDoneEvent;
-import microbots.core.util.Events.SimulationRunCalledEvent;
+import microbots.core.model.events.SimulationRoundDoneEvent;
+import microbots.core.model.events.SimulationRunCalledEvent;
 import microbots.core.ui.events.WindowRepaintDoneEvent;
 import microbots.core.ui.Window;
 
