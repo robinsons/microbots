@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.model;
 
 /** Container for default values used in the simulation. */
 public final class SimulationDefaults {

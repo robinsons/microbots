@@ -13,7 +13,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.Comparator;
-import microbots.core.Arena;
+import microbots.core.model.Arena;
 import microbots.core.ui.PopulationSnapshot.Population;
 
 /** Shows the remaining population of each microbot type in the battle. */

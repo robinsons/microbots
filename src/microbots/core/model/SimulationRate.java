@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.model;
 
 /** Represents the predefined speeds at which a {@link Simulation} may be run. */
 public enum SimulationRate {

@@ -10,7 +10,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import javax.swing.JPanel;
-import microbots.core.Arena;
+import microbots.core.model.Arena;
 
 /**
  * This is the root (and sole) content panel for the {@link Window}. Since Swing's layouts are a bit

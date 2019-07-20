@@ -1,11 +1,7 @@
-import microbots.core.Simulation;
+import microbots.core.model.Simulation;
 import microbots.impl.Hive;
-import microbots.impl.Looper1;
-import microbots.impl.Looper2;
 import microbots.impl.Microbot9000;
 import microbots.impl.ScrapPile;
-import microbots.impl.Sweeper1;
-import microbots.impl.Sweeper2;
 
 public final class Main {
   public static void main(String[] args) {

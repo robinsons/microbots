@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-import microbots.core.Arena;
+import microbots.core.model.Arena;
 
 /**
  * Tracks a sequence of {@link PopulationSnapshot PopulationSnapshots} for monitoring microbot

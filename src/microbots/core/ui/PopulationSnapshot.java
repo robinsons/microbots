@@ -11,8 +11,8 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
-import microbots.core.Arena;
-import microbots.core.Microbot;
+import microbots.core.model.Arena;
+import microbots.core.model.Microbot;
 
 /** Represents a snapshot of all microbot populations at a given point in time. */
 final class PopulationSnapshot {

@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.model;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;

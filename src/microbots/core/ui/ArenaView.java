@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import microbots.core.Arena;
-import microbots.core.Microbot;
-import microbots.core.Terrain;
+import microbots.core.model.Arena;
+import microbots.core.model.Microbot;
+import microbots.core.model.Terrain;
 
 /** Shows the positions of the microbots in the arena. */
 final class ArenaView extends View {

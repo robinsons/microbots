@@ -16,7 +16,7 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import microbots.core.Arena;
+import microbots.core.model.Arena;
 import microbots.core.ui.PopulationSnapshot.Population;
 
 /** Shows a histogram displaying microbot populations over time. */

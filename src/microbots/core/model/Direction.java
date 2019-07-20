@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.model;
 
 /**
  * Represents the four cardinal directions. These are used to track what direction a microbot is

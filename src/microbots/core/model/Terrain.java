@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.model;
 
 import static com.google.common.collect.MoreCollectors.toOptional;
 
