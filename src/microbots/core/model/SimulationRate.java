@@ -15,9 +15,7 @@ public enum SimulationRate {
     this.description = description;
   }
 
-  /**
-   * Returns the number of milliseconds that this rate allots per simulation round.
-   */
+  /** Returns the number of milliseconds that this rate allots per simulation round. */
   long millisPerRound() {
     return millisPerRound;
   }
