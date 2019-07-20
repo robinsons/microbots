@@ -1,6 +1,8 @@
-package microbots.core;
+package microbots.core.util;
 
 import com.google.common.eventbus.EventBus;
+import microbots.core.Simulation;
+import microbots.core.SimulationRate;
 import microbots.core.ui.Window;
 
 /** Utility class to coordinate events between the model and UI via an {@link EventBus}. */
