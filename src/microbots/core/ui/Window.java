@@ -6,10 +6,10 @@ import java.awt.Graphics;
 import java.util.Collection;
 import javax.swing.JFrame;
 import microbots.MicrobotProcessingUnit;
-import microbots.core.util.Events;
 import microbots.core.model.events.SimulationRoundDoneEvent;
 import microbots.core.model.events.SimulationRunCalledEvent;
 import microbots.core.ui.events.WindowRepaintDoneEvent;
+import microbots.core.util.Events;
 
 /** The window holds UI components that show the simulation as it runs. */
 public final class Window extends JFrame {

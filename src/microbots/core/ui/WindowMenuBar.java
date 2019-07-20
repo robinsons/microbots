@@ -24,11 +24,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import microbots.MicrobotProcessingUnit;
 import microbots.core.model.ArenaMap;
-import microbots.core.util.Events;
-import microbots.core.ui.events.SimulationRateChangedEvent;
 import microbots.core.model.Simulation;
 import microbots.core.model.SimulationDefaults;
 import microbots.core.model.SimulationRate;
+import microbots.core.ui.events.SimulationRateChangedEvent;
+import microbots.core.util.Events;
 
 /**
  * The menu bar offers options for controlling the running simulation. For example, one can change

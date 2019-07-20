@@ -14,12 +14,12 @@ import microbots.Action;
 import microbots.MicrobotProcessingUnit;
 import microbots.State;
 import microbots.Surroundings;
-import microbots.core.util.Events;
-import microbots.core.ui.events.SimulationRateChangedEvent;
 import microbots.core.model.events.SimulationRoundDoneEvent;
 import microbots.core.model.events.SimulationRunCalledEvent;
-import microbots.core.ui.events.WindowRepaintDoneEvent;
 import microbots.core.ui.Window;
+import microbots.core.ui.events.SimulationRateChangedEvent;
+import microbots.core.ui.events.WindowRepaintDoneEvent;
+import microbots.core.util.Events;
 
 /**
  * Entry point for configuring a microbot battle simulation. Example usage:
@@ -214,7 +214,8 @@ public final class Simulation implements Runnable {
      * Adds each {@link MicrobotProcessingUnit MPU type} from the given collection to the simulation
      * being built.
      */
-    public Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
+    public Builder addMpuTypes(
+        ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
       checkNotNull(mpuTypes);
       mpuTypes.forEach(this::addMpuType);
       return this;
