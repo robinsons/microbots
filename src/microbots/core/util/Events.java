@@ -28,10 +28,6 @@ public final class Events {
     EVENT_BUS.post(event);
   }
 
-  /** Events are used to pass state or notifications between the model and the UI. */
-  public interface Event {
-  }
-
   /** Event that is posted by the {@link Window} each time it finishes repainting itself. */
   public static final class WindowRepaintDoneEvent implements Event {
   }
