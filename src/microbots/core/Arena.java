@@ -13,7 +13,7 @@ import microbots.Obstacle;
 import microbots.Surroundings;
 
 /** The arena is where microbots do battle. */
-final class Arena {
+public final class Arena {
 
   private final Table<Integer, Integer, Microbot> microbots;
   private final ImmutableTable<Integer, Integer, Terrain> terrain;
@@ -29,24 +29,24 @@ final class Arena {
   }
 
   /** Returns the number of rows in this arena. */
-  int rows() {
+  public int rows() {
     return arenaMap.rows();
   }
 
   /** Returns the number of columns in this arena. */
-  int columns() {
+  public int columns() {
     return arenaMap.columns();
   }
 
   /** Returns all of the microbots currently in this arena. */
-  ImmutableSet<Microbot> microbots() {
+  public ImmutableSet<Microbot> microbots() {
     synchronized (microbots) {
       return ImmutableSet.copyOf(microbots.values());
     }
   }
 
   /** Returns this arena's terrain. */
-  ImmutableTable<Integer, Integer, Terrain> terrain() {
+  public ImmutableTable<Integer, Integer, Terrain> terrain() {
     return terrain;
   }
 

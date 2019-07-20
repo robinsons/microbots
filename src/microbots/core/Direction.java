@@ -6,7 +6,7 @@ package microbots.core;
  *
  * <p><b>IMPORTANT: do not change the order of elements.</b>
  */
-enum Direction {
+public enum Direction {
   NORTH(-1, 0, 0),
   EAST(0, 1, 90),
   SOUTH(1, 0, 180),
@@ -56,7 +56,7 @@ enum Direction {
   }
 
   /** Returns the angle in radians that this direction would be on a compass, relative to north. */
-  double compassAngleRadians() {
+  public double compassAngleRadians() {
     return Math.toRadians(compassAngleDegrees);
   }
 

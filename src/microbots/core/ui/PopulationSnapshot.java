@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableList.toImmutableList;
@@ -11,6 +11,8 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
+import microbots.core.Arena;
+import microbots.core.Microbot;
 
 /** Represents a snapshot of all microbot populations at a given point in time. */
 final class PopulationSnapshot {

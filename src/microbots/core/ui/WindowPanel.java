@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static microbots.core.ui.GraphicsUtil.drawAndPreserveTransform;
@@ -10,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import javax.swing.JPanel;
+import microbots.core.Arena;
 
 /**
  * This is the root (and sole) content panel for the {@link Window}. Since Swing's layouts are a bit

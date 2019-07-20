@@ -18,6 +18,7 @@ import microbots.core.Events.SimulationRateChangedEvent;
 import microbots.core.Events.SimulationRoundDoneEvent;
 import microbots.core.Events.SimulationRunCalledEvent;
 import microbots.core.Events.WindowRepaintDoneEvent;
+import microbots.core.ui.Window;
 
 /**
  * Entry point for configuring a microbot battle simulation. Example usage:
@@ -71,7 +72,7 @@ public final class Simulation implements Runnable {
   }
 
   /** Returns the {@link Arena} of this {@link Simulation}. */
-  Arena arena() {
+  public Arena arena() {
     return arena;
   }
 
@@ -212,20 +213,20 @@ public final class Simulation implements Runnable {
      * Adds each {@link MicrobotProcessingUnit MPU type} from the given collection to the simulation
      * being built.
      */
-    Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
+    public Builder addMpuTypes(ImmutableCollection<Class<? extends MicrobotProcessingUnit>> mpuTypes) {
       checkNotNull(mpuTypes);
       mpuTypes.forEach(this::addMpuType);
       return this;
     }
 
     /** Sets the arena map to use in the simulation. */
-    Builder setArenaMap(ArenaMap arenaMap) {
+    public Builder setArenaMap(ArenaMap arenaMap) {
       this.arenaMap = checkNotNull(arenaMap);
       return this;
     }
 
     /** Sets the simulation rate to use in the new simulation. */
-    Builder setSimulationRate(SimulationRate simulationRate) {
+    public Builder setSimulationRate(SimulationRate simulationRate) {
       this.simulationRate = checkNotNull(simulationRate);
       return this;
     }
@@ -234,7 +235,7 @@ public final class Simulation implements Runnable {
      * Builds a simulation based on the parameters of this builder and then starts it in its own
      * thread.
      */
-    void startInternal() {
+    public void startInternal() {
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
       Simulation simulation = new Simulation(microbots, arena, simulationRate);

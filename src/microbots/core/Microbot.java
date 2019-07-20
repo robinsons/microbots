@@ -11,7 +11,7 @@ import microbots.Obstacle;
 import microbots.State;
 
 /** Wraps a {@link MicrobotProcessingUnit} along with additional data for the simulation. */
-final class Microbot {
+public final class Microbot {
 
   private static final HashMap<Class<? extends MicrobotProcessingUnit>, Color> MPU_COLOR_CACHE =
       new HashMap<>();
@@ -31,12 +31,12 @@ final class Microbot {
   }
 
   /** @see MicrobotProcessingUnit#name() */
-  String name() {
+  public String name() {
     return firstNonNull(mpu.name(), mpu.getClass().getSimpleName());
   }
 
   /** @see MicrobotProcessingUnit#color() */
-  Color color() {
+  public Color color() {
     if (!MPU_COLOR_CACHE.containsKey(mpu.getClass())) {
       MPU_COLOR_CACHE.put(mpu.getClass(), firstNonNull(mpu.color(), Color.WHITE));
     }
@@ -50,17 +50,17 @@ final class Microbot {
   }
 
   /** Returns the type of this microbot's MPU. */
-  Class<? extends MicrobotProcessingUnit> mpuType() {
+  public Class<? extends MicrobotProcessingUnit> mpuType() {
     return mpu.getClass();
   }
 
   /** Returns the row this microbot is located at in the arena. */
-  int row() {
+  public int row() {
     return row;
   }
 
   /** Returns the column this microbot is located at in the arena. */
-  int column() {
+  public int column() {
     return column;
   }
 
@@ -71,7 +71,7 @@ final class Microbot {
   }
 
   /** Returns the {@link Direction} this microbot is currently facing. */
-  Direction facing() {
+  public Direction facing() {
     return facing;
   }
 

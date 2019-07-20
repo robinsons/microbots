@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /** Terrain are static, non-microbot features that may be present in the arena. */
-enum Terrain {
+public enum Terrain {
 
   /** A field is just an empty space on a map. Microbots can move onto this terrain. */
   FIELD(' ', true),

@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /** An {@link ArenaMap} is a preconfigured arrangement of {@link Terrain}. */
-enum ArenaMap {
+public enum ArenaMap {
   /**
    * The open map has no terrain. Microbots will be able to "wrap around" on the sides of the arena.
    */
@@ -58,14 +58,14 @@ enum ArenaMap {
   }
 
   /** Returns a description of this map, suitable for displaying in the UI. */
-  String description() {
+  public String description() {
     return description;
   }
 
   /**
    * Returns this map's mnemonic, which is the hotkey that can be used to select it from the menu.
    */
-  int mnemonic() {
+  public int mnemonic() {
     return mnemonic;
   }
 

@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.ui;
 
 import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
@@ -6,12 +6,13 @@ import java.awt.Graphics;
 import java.util.Collection;
 import javax.swing.JFrame;
 import microbots.MicrobotProcessingUnit;
+import microbots.core.Events;
 import microbots.core.Events.SimulationRoundDoneEvent;
 import microbots.core.Events.SimulationRunCalledEvent;
 import microbots.core.Events.WindowRepaintDoneEvent;
 
 /** The window holds UI components that show the simulation as it runs. */
-final class Window extends JFrame {
+public final class Window extends JFrame {
 
   private static final String WINDOW_TITLE = "Microbot Battle Arena";
 
@@ -45,7 +46,7 @@ final class Window extends JFrame {
   }
 
   /** Creates a new {@link Window}. */
-  static void create(
+  public static void create(
       Collection<Class<? extends MicrobotProcessingUnit>> selectedMpuTypes, int populationSize) {
     Window window = new Window();
     window.setTitle(WINDOW_TITLE);

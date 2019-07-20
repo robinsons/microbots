@@ -1,11 +1,11 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static microbots.core.ui.GraphicsUtil.drawStringWithShadow;
-import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
-import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.EXO_EXTRA_BOLD;
-import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
+import static microbots.core.ui.UIConstants.ARENA_CELL_SIZE_PX;
+import static microbots.core.ui.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.ui.UIConstants.EXO_EXTRA_BOLD;
+import static microbots.core.ui.UIConstants.SIDE_VIEW_WIDTH_PX;
 
 import com.google.common.collect.ImmutableList;
 import java.awt.Color;
@@ -13,7 +13,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.Comparator;
-import microbots.core.PopulationSnapshot.Population;
+import microbots.core.Arena;
+import microbots.core.ui.PopulationSnapshot.Population;
 
 /** Shows the remaining population of each microbot type in the battle. */
 final class PopulationView extends View {

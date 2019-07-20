@@ -1,10 +1,10 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
-import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.RATIONAL_INTEGER;
-import static microbots.core.UIConstants.SIDE_VIEW_WIDTH_PX;
+import static microbots.core.ui.UIConstants.ARENA_CELL_SIZE_PX;
+import static microbots.core.ui.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.ui.UIConstants.RATIONAL_INTEGER;
+import static microbots.core.ui.UIConstants.SIDE_VIEW_WIDTH_PX;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -16,7 +16,8 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import microbots.core.PopulationSnapshot.Population;
+import microbots.core.Arena;
+import microbots.core.ui.PopulationSnapshot.Population;
 
 /** Shows a histogram displaying microbot populations over time. */
 final class HistogramView extends View {

@@ -1,7 +1,7 @@
 package microbots.core;
 
 /** Represents the predefined speeds at which a {@link Simulation} may be run. */
-enum SimulationRate {
+public enum SimulationRate {
   NORMAL(100L, "Normal - 100 ms"),
   FAST(50L, "Fast - 50 ms"),
   FASTER(16L, "Faster - 16 ms"),
@@ -23,7 +23,7 @@ enum SimulationRate {
   }
 
   /** Returns a textual representation of this rate, suitable for displaying in the UI. */
-  String description() {
+  public String description() {
     return description;
   }
 }

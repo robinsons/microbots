@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -23,7 +23,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 import microbots.MicrobotProcessingUnit;
+import microbots.core.ArenaMap;
+import microbots.core.Events;
 import microbots.core.Events.SimulationRateChangedEvent;
+import microbots.core.Simulation;
+import microbots.core.SimulationDefaults;
+import microbots.core.SimulationRate;
 
 /**
  * The menu bar offers options for controlling the running simulation. For example, one can change

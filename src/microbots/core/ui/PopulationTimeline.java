@@ -1,4 +1,4 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
+import microbots.core.Arena;
 
 /**
  * Tracks a sequence of {@link PopulationSnapshot PopulationSnapshots} for monitoring microbot

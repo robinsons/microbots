@@ -1,16 +1,16 @@
-package microbots.core;
+package microbots.core.ui;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static microbots.core.ui.GraphicsUtil.drawAndPreserveTransform;
-import static microbots.core.UIConstants.ARENA_CELL_SIZE_PX;
-import static microbots.core.UIConstants.BACKGROUND_COLOR;
-import static microbots.core.UIConstants.MICROBOT_DIRECTIONAL_VECTOR_COLOR;
-import static microbots.core.UIConstants.MICROBOT_HALF_SIZE_DOUBLE_PX;
-import static microbots.core.UIConstants.MICROBOT_NORTH_FACING_VECTOR_SHAPE;
-import static microbots.core.UIConstants.MICROBOT_PADDING_PX;
-import static microbots.core.UIConstants.MICROBOT_SIZE_PX;
-import static microbots.core.UIConstants.WALL_COLOR;
+import static microbots.core.ui.UIConstants.ARENA_CELL_SIZE_PX;
+import static microbots.core.ui.UIConstants.BACKGROUND_COLOR;
+import static microbots.core.ui.UIConstants.MICROBOT_DIRECTIONAL_VECTOR_COLOR;
+import static microbots.core.ui.UIConstants.MICROBOT_HALF_SIZE_DOUBLE_PX;
+import static microbots.core.ui.UIConstants.MICROBOT_NORTH_FACING_VECTOR_SHAPE;
+import static microbots.core.ui.UIConstants.MICROBOT_PADDING_PX;
+import static microbots.core.ui.UIConstants.MICROBOT_SIZE_PX;
+import static microbots.core.ui.UIConstants.WALL_COLOR;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -24,7 +24,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import microbots.core.ui.GraphicsUtil;
+import microbots.core.Arena;
+import microbots.core.Microbot;
+import microbots.core.Terrain;
 
 /** Shows the positions of the microbots in the arena. */
 final class ArenaView extends View {
