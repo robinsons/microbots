@@ -11,13 +11,15 @@ public final class Events {
   private Events() {}
 
   /** @see EventBus#register(Object) */
-  public static void register(Object object) {
+  public static <T> T register(T object) {
     EVENT_BUS.register(object);
+    return object;
   }
 
   /** @see EventBus#unregister(Object) */
-  public static void unregister(Object object) {
+  public static <T> T unregister(T object) {
     EVENT_BUS.unregister(object);
+    return object;
   }
 
   /** @see EventBus#post(Object) */
