@@ -54,7 +54,6 @@ public final class Simulation extends AbstractScheduledService {
           Action.ROTATE_RIGHT, Simulation::handleRotateRight,
           Action.HACK, Simulation::handleHack);
 
-  private boolean terminationRequested = false;
   private boolean windowRepaintDoneCalled = false;
 
   private final ImmutableList<Microbot> microbots;
@@ -79,7 +78,9 @@ public final class Simulation extends AbstractScheduledService {
 
   @Subscribe
   public void onSimulationRunCalled(SimulationRunCalledEvent event) {
-    terminationRequested = this != event.simulation();
+    if (!equals(event.simulation())) {
+      stopAsync();
+    }
   }
 
   @Subscribe
@@ -105,9 +106,7 @@ public final class Simulation extends AbstractScheduledService {
 
   @Override
   protected void runOneIteration() throws Exception {
-    if (terminationRequested) {
-      stopAsync();
-    } else if (windowRepaintDoneCalled) {
+    if (windowRepaintDoneCalled) {
       doRound();
       windowRepaintDoneCalled = false;
       Events.post(new SimulationRoundDoneEvent());
@@ -253,16 +252,16 @@ public final class Simulation extends AbstractScheduledService {
     private Schedule nextSchedule;
 
     private SimulationRateScheduler(SimulationRate simulationRate) {
-      prepareNextSchedule(simulationRate);
+      nextSchedule = toSchedule(simulationRate);
     }
 
     @Subscribe
     public void onSimulationRateChanged(SimulationRateChangedEvent event) {
-      prepareNextSchedule(event.simulationRate());
+      nextSchedule = toSchedule(event.simulationRate());
     }
 
-    private void prepareNextSchedule(SimulationRate simulationRate) {
-      nextSchedule = new Schedule(simulationRate.millisPerRound(), TimeUnit.MILLISECONDS);
+    private Schedule toSchedule(SimulationRate simulationRate) {
+      return new Schedule(simulationRate.millisPerRound(), TimeUnit.MILLISECONDS);
     }
 
     @Override
