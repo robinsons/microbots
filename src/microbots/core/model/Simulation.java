@@ -7,12 +7,13 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.eventbus.Subscribe;
+import com.google.common.util.concurrent.AbstractScheduledService;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import microbots.Action;
 import microbots.MicrobotProcessingUnit;
-import microbots.State;
 import microbots.Surroundings;
 import microbots.core.model.events.SimulationRoundDoneEvent;
 import microbots.core.model.events.SimulationRunCalledEvent;
@@ -35,7 +36,7 @@ import microbots.core.util.Events;
  *       .start();
  * </pre>
  */
-public final class Simulation implements Runnable {
+public final class Simulation extends AbstractScheduledService {
 
   /** Simple functional interface to provide type clarity for the {@link #ACTION_DELEGATES} map. */
   @FunctionalInterface
@@ -58,13 +59,12 @@ public final class Simulation implements Runnable {
 
   private final ImmutableList<Microbot> microbots;
   private final Arena arena;
-  private SimulationRate simulationRate;
+  private final Scheduler scheduler;
 
-  private Simulation(
-      ImmutableList<Microbot> microbots, Arena arena, SimulationRate simulationRate) {
+  private Simulation(ImmutableList<Microbot> microbots, Arena arena, Scheduler scheduler) {
     this.microbots = microbots;
     this.arena = arena;
-    this.simulationRate = simulationRate;
+    this.scheduler = scheduler;
   }
 
   /** Returns the list of {@link Microbot Microbots} participating in this {@link Simulation}. */
@@ -83,35 +83,35 @@ public final class Simulation implements Runnable {
   }
 
   @Subscribe
-  public void onSimulationRateChanged(SimulationRateChangedEvent event) {
-    simulationRate = event.simulationRate();
-  }
-
-  @Subscribe
   public void onWindowRepaintDone(WindowRepaintDoneEvent event) {
     windowRepaintDoneCalled = true;
   }
 
-  /** Runs the simulation! */
   @Override
-  public void run() {
+  protected Scheduler scheduler() {
+    return scheduler;
+  }
+
+  @Override
+  protected void startUp() {
+    Events.register(this);
     Events.post(new SimulationRunCalledEvent(this));
+  }
 
-    while (!terminationRequested) {
+  @Override
+  protected void shutDown() {
+    Events.unregister(this);
+  }
+
+  @Override
+  protected void runOneIteration() throws Exception {
+    if (terminationRequested) {
+      stopAsync();
+    } else if (windowRepaintDoneCalled) {
       doRound();
-
       windowRepaintDoneCalled = false;
       Events.post(new SimulationRoundDoneEvent());
-      do {
-        try {
-          Thread.sleep(simulationRate.millisPerRound());
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      } while (!windowRepaintDoneCalled);
     }
-
-    Events.unregister(this);
   }
 
   /**
@@ -125,7 +125,7 @@ public final class Simulation implements Runnable {
   /** Performs a single action for the specified microbot. */
   private void processAction(Microbot microbot) {
     Surroundings surroundings = arena.getMicrobotSurroundings(microbot);
-    State state = new State(microbot.facing().simpleDirection(), surroundings);
+    microbots.State state = new microbots.State(microbot.facing().simpleDirection(), surroundings);
     Action action = microbot.getAction(state);
     ActionDelegate delegate =
         ACTION_DELEGATES.getOrDefault(action, Simulation::handleUnknownAction);
@@ -240,11 +240,34 @@ public final class Simulation implements Runnable {
     public void startInternal() {
       ImmutableList<Microbot> microbots = MicrobotFactory.create(populationSize).ofEach(mpuTypes);
       Arena arena = Arena.builder().withMap(arenaMap).withMicrobots(microbots).build();
-      Simulation simulation = new Simulation(microbots, arena, simulationRate);
+      Scheduler scheduler = Events.register(new SimulationRateScheduler(simulationRate));
+      new Simulation(microbots, arena, scheduler).startAsync();
+    }
+  }
 
-      Events.register(simulation);
+  /**
+   * {@link CustomScheduler} implementation that subscribes to {@link SimulationRateChangedEvent
+   * changes in the simulation rate} in order to change the Simulation's schedule.
+   */
+  private static final class SimulationRateScheduler extends CustomScheduler {
+    private Schedule nextSchedule;
 
-      new Thread(simulation).start();
+    private SimulationRateScheduler(SimulationRate simulationRate) {
+      prepareNextSchedule(simulationRate);
+    }
+
+    @Subscribe
+    public void onSimulationRateChanged(SimulationRateChangedEvent event) {
+      prepareNextSchedule(event.simulationRate());
+    }
+
+    private void prepareNextSchedule(SimulationRate simulationRate) {
+      nextSchedule = new Schedule(simulationRate.millisPerRound(), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    protected Schedule getNextSchedule() throws Exception {
+      return nextSchedule;
     }
   }
 }
